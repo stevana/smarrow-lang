@@ -23,7 +23,8 @@ program distributed systems.
 
 ## Getting started
 
-(This isn't implemented yet, it's merely an exercise in wishful thinking.)
+(This isn't implemented yet, it's merely an exercise in wishful thinking. Have a
+look at the testsuite to see what's actually working.)
 
 ```haskell
 $ cat example.smarr
