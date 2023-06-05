@@ -122,7 +122,7 @@ pExpr' = pProc <|> eqLt' `cut` ["expr"]
         pCon = Con . ConName <$> conName
 
         pInt :: Parser Expr
-        pInt = ConstE . Int <$> int
+        pInt = LitE . Int <$> int
 
         pReturn :: Parser Expr
         pReturn = $(keyword "return") $> ReturnE

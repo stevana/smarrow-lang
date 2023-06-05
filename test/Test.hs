@@ -53,5 +53,5 @@ unit_ifTrue = "proc b -> if b then return -< 1 else return -< 2" @ "True" ==> "1
 unit_caseInt :: Assertion
 unit_caseInt = "proc b -> case b of { False -> return -< 0; True -> return -< 1 }" @ "True" ==> "1"
 
-unit_ifEq :: Assertion
-unit_ifEq = "proc i -> if i == 2 then return -< 1 else return -< 0" @ "2" ==> "1"
+unit_ifEq2 :: Assertion
+unit_ifEq2 = "proc i -> if i == 2 then return -< True else return -< False" @ "2" ==> "True"

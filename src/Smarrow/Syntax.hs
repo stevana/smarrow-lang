@@ -35,7 +35,7 @@ newtype TypeName = TypeName Text
 newtype MachineName = MachineName Text
   deriving (Eq, Ord, Show, IsString)
 
-data Const = Int Int | Bool Bool
+data Lit = Int Int | Char Char
   deriving (Eq, Show)
 
 data UnaryOp = Not | Negate
@@ -45,7 +45,7 @@ data BinOp = Add | Mult | And | Or | Eq | Lt
   deriving (Eq, Show)
 
 data Expr
-  = ConstE Const
+  = LitE Lit
   | VarE Var
   | UnaryOp UnaryOp Expr
   | BinOp BinOp Expr Expr

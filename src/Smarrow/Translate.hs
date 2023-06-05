@@ -35,11 +35,11 @@ tr env  (VarE v)        = lookupVar env v
 tr env  (PairE l r)     = tr env l :&&& tr env r
 tr _env ReturnE         = Id
 tr _env IdE             = Id
-tr _env (ConstE x)      = ConstA x
+tr _env (LitE x)        = LitA x
 tr env  (FstE p)        = tr env p :>>> Fst
 tr env  (SndE p)        = tr env p :>>> Snd
 tr env  (BinOp op x y)  = tr env x :&&& tr env y :>>> BinOpA op
--- tr env  (Con conName)   = Inject (conNameIndex env conName) UnitE
+tr env  (Con conName)   = InjectA conName (conNameIndex env conName)
 tr _env e = error (show e)
 
 trAlts :: Env -> Pat -> [Alt] -> [CCC]
@@ -52,5 +52,6 @@ trAlt _env _pat alt = error (show alt)
 -- trAlt env (Alt pat            (UnguardedAlt cmd) _decls) = tr env (Proc pat cmd)
 
 translateValueCons :: Env -> Value -> Value
-translateValueCons env (ConV conName) = Inject (conNameIndex env conName) UnitV -- XXX: constructor arguments
+translateValueCons env (ConV conName) = Inject conName (conNameIndex env conName) UnitV
+-- ^ XXX: constructor arguments
 translateValueCons _env v = v

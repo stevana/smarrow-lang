@@ -2,7 +2,7 @@
 
 module Smarrow.CCC where
 
-import Smarrow.Syntax (Const, BinOp)
+import Smarrow.Syntax (BinOp, ConName, Lit)
 
 ------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ data CCC
   | Id
   | App
   | CCC :||| CCC
-  | ConstA Const
+  | LitA Lit
   | First CCC
   | Second CCC
   | Dup
@@ -23,6 +23,7 @@ data CCC
 
   | Project Int
   | FanOut [CCC]
+  | InjectA ConName Int
   | FanIn [CCC]
 
   | BinOpA BinOp
@@ -31,6 +32,7 @@ data CCC
 simplify1 :: CCC -> CCC
 simplify1 (Id :&&& Id) = Dup
 simplify1 (a :&&& b)   = simplify1 a :&&& simplify1 b
+simplify1 (a :||| b)   = simplify1 a :||| simplify1 b
 simplify1 (a :>>> Id)  = simplify1 a
 simplify1 (a :>>> b)   = simplify1 a :>>> simplify1 b
 simplify1 a = a
