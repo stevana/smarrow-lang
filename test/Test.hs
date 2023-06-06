@@ -4,10 +4,11 @@ module Test where
 
 import Test.Tasty.HUnit
 
+import Smarrow.Environment
 import Smarrow.Interpreter
 import Smarrow.Parser
 import Smarrow.Translate
-import Smarrow.Environment
+import Smarrow.Value
 
 ------------------------------------------------------------------------
 
@@ -20,7 +21,21 @@ import Smarrow.Environment
       Right argVal -> case testParser pValue' expected of
         Left err''        -> fail err''
         Right expectedVal ->
-          interpret funExpr (translateValueCons defaultEnv argVal) @?= expectedVal
+          snd (interpret funExpr (translateValueCons defaultEnv argVal) UnitV) @?= expectedVal
+
+(~~>) :: ((String, String), String) -> String -> Assertion
+((fun, arg), state) ~~> expected =
+  case testParser pSrc' fun of
+    Left  err     -> fail err
+    Right funExpr -> case testParser pValue' arg of
+      Left err'    -> fail err'
+      Right argVal -> case testParser pValue' state of
+        Left err'' -> fail err''
+        Right stateVal -> case testParser pValue' expected of
+          Left err'''       -> fail err'''
+          Right expectedVal ->
+            uncurry PairV (interpret funExpr (translateValueCons defaultEnv argVal) (translateValueCons defaultEnv stateVal))
+              @?= expectedVal
 
 (@) :: a -> b -> (a, b)
 (@) = (,)
@@ -50,8 +65,13 @@ unit_assoc = "proc (x, (y, z)) -> return -< ((x, y), z)" @ "(1, (2, 3))" ==> "((
 unit_ifTrue :: Assertion
 unit_ifTrue = "proc b -> if b then return -< 1 else return -< 2" @ "True" ==> "1"
 
-unit_caseInt :: Assertion
-unit_caseInt = "proc b -> case b of { False -> return -< 0; True -> return -< 1 }" @ "True" ==> "1"
+unit_caseNot :: Assertion
+unit_caseNot = "proc b -> case b of { False -> return -< True; True -> return -< False }" @ "True" ==> "False"
 
 unit_ifEq2 :: Assertion
 unit_ifEq2 = "proc i -> if i == 2 then return -< True else return -< False" @ "2" ==> "True"
+
+------------------------------------------------------------------------
+
+unit_incrState :: Assertion
+unit_incrState = "proc () -> do { i <- get -< (); j <- put -< i + 1; return -< j }" @ "()" @ "0" ~~> "(1, ())"

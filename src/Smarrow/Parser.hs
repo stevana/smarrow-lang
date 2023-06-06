@@ -41,6 +41,8 @@ testParserIO p str = case strToUtf8 str of
 -- A lot of this code is stolen from:
 -- https://github.com/AndrasKovacs/flatparse/blob/main/src/FlatParse/Examples/BasicLambda/Parser.hs
 
+-- Also see: https://www.haskell.org/onlinereport/haskell2010/haskellch10.html
+
 type Name = B.ByteString
 
 -- | Parse an identifier. This parser uses `isKeyword` to check that an identifier is not a
@@ -90,8 +92,14 @@ pExpr' = pProc <|> eqLt' `cut` ["expr"]
       branch $(symbol "<")  (BinOp Lt e1 <$> pair) $
       pure e1
 
+    -- XXX: doesn't look right...
     pair :: Parser Expr
-    pair = pair' <|> add'
+    pair = pUnit <|> pair' <|> add'
+      where
+        pUnit :: Parser Expr
+        pUnit = do
+          $(symbol "()")
+          return UnitE
 
     pair' :: Parser Expr
     pair' = do
@@ -110,10 +118,11 @@ pExpr' = pProc <|> eqLt' `cut` ["expr"]
 
     atom' :: Parser Expr
     atom' = atom
-      `cut` [Msg "identifier", "consturctor", Msg "parenthesised expression", Msg "integer literal"]
+      `cut` map Msg ["variable", "consturctor", "integer literal", "return",
+                     "get", "put", "parenthesised expression" ]
 
     atom :: Parser Expr
-    atom = pVarE <|> pCon <|> pInt <|> pReturn <|> pUnit <|> pParenExpr
+    atom = pVarE <|> pCon <|> pInt <|> pReturn <|> pGet <|> pPut <|> pParenExpr
       where
         pVarE :: Parser Expr
         pVarE = VarE <$> pVar
@@ -127,11 +136,11 @@ pExpr' = pProc <|> eqLt' `cut` ["expr"]
         pReturn :: Parser Expr
         pReturn = $(keyword "return") $> ReturnE
 
-        pUnit :: Parser Expr
-        pUnit = do
-          $(symbol "(")
-          $(symbol ")") -- XXX: '?
-          return UnitE
+        pGet :: Parser Expr
+        pGet = $(keyword "get") $> GetE
+
+        pPut :: Parser Expr
+        pPut = $(keyword "put") $> PutE
 
         pParenExpr :: Parser Expr
         pParenExpr = $(symbol "(") *> pExpr' <* $(symbol' ")")
@@ -147,13 +156,16 @@ pPat' :: Parser Pat
 pPat' = pPat `cut` ["pattern"]
 
 pPat :: Parser Pat
-pPat = pVarP <|> pConNameP <|> pTupleP <|> pWildP <|> pUnitP
+pPat = pVarP <|> pConNameP <|> pUnitP <|> pTupleP <|> pWildP
   where
     pVarP :: Parser Pat
     pVarP = VarP <$> pVar
 
     pConNameP :: Parser Pat
     pConNameP = ConNameP . ConName <$> conName
+
+    pUnitP :: Parser Pat
+    pUnitP = $(symbol "()") $> UnitP
 
     pTupleP :: Parser Pat
     pTupleP = do
@@ -167,8 +179,6 @@ pPat = pVarP <|> pConNameP <|> pTupleP <|> pWildP <|> pUnitP
     pWildP :: Parser Pat
     pWildP = $(symbol "_") $> WildP
 
-    pUnitP :: Parser Pat
-    pUnitP = $(symbol "()") $> UnitP
 
 pVar :: Parser Var
 pVar = Var <$> ident
@@ -227,7 +237,7 @@ pValue' :: Parser Value
 pValue' = pValue `cut` ["tuple", "unit", "integer", "constructor"]
 
 pValue :: Parser Value
-pValue = pPair <|> pUnit <|> pInt <|> pCon
+pValue = pPair <|> pUnitV <|> pInt <|> pCon
   where
     pPair :: Parser Value
     pPair = do
@@ -238,8 +248,8 @@ pValue = pPair <|> pUnit <|> pInt <|> pCon
       $(symbol' ")")
       return (PairV l r)
 
-    pUnit :: Parser Value
-    pUnit = do
+    pUnitV :: Parser Value
+    pUnitV = do
       $(symbol "(")
       $(symbol' ")")
       return UnitV

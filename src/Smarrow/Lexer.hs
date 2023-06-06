@@ -160,6 +160,8 @@ isKeyword span0 = inSpan span0 $ do
   $(switch [| case _ of
       "proc"   -> pure ()
       "return" -> pure ()
+      "get"    -> pure ()
+      "put"    -> pure ()
       -- "let"    -> pure ()
       -- "in"     -> pure () -- XXX: causes: This binding for ‘c’ shadows the existing binding
       "do"     -> pure ()

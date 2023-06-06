@@ -62,6 +62,8 @@ data Expr
   | SndE Expr
   | FanOutE Expr Expr
   | Con ConName -- [Expr]
+  | GetE
+  | PutE
   deriving (Eq, Show)
 
 data Cmd
@@ -135,6 +137,8 @@ fvE (VarE v)        = Set.singleton v
 fvE ReturnE         = Set.empty
 fvE (PairE l r)     = fvE l `Set.union` fvE r
 fvE IdE             = Set.empty
+fvE GetE            = Set.empty
+fvE PutE            = Set.empty
 fvE e = error (show e)
 
 fvC :: Cmd -> Set Var

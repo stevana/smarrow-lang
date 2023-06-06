@@ -84,9 +84,12 @@ library
     , base              ^>=4.17.0.0
     , bytestring
     , containers
-    , flatparse
     , template-haskell
     , text
+    , transformers
+
+  build-depends:
+    , flatparse
 
   -- Directories containing source files.
   hs-source-dirs:   src

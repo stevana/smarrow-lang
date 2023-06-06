@@ -21,12 +21,16 @@ data CCC
   | Dup
   | CCC :*** CCC
 
+  | Unit
   | Project Int
   | FanOut [CCC]
   | InjectA ConName Int
   | FanIn [CCC]
 
   | BinOpA BinOp
+
+  | Get
+  | Put
   deriving (Eq, Show)
 
 simplify1 :: CCC -> CCC

@@ -90,6 +90,9 @@ Deploying and upgrading over SSH should work similarly to REPL/localhost.
 
 ### Deployments
 
+`smarrow deploy <source-file> <deployment-name> [<host>][:<port>]`
+`smarrow call <deployment-name> <input>`
+
 ### Upgrades
 
 * Patches vs upgrades, semantically check inputs and outputs for changes?
@@ -103,6 +106,10 @@ But on a state machine level instead of function level?
 ### Pipelining
 
 XXX: Horizontally compose state machines.
+
+### Supervision trees
+
+### Time-travelling debugger
 
 ## Contributing
 
