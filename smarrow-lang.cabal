@@ -62,6 +62,13 @@ library
   -- Modules exported by the library.
   exposed-modules:
     Smarrow.CCC
+    Smarrow.Deploy.Codec
+    Smarrow.Deploy.Config
+    Smarrow.Deploy.Event
+    Smarrow.Deploy.EventLoop
+    Smarrow.Deploy.EventQueue
+    Smarrow.Deploy.PendingRequests
+    Smarrow.Deploy.Transport
     Smarrow.Environment
     Smarrow.Interpreter
     Smarrow.Lexer
@@ -72,13 +79,6 @@ library
     Smarrow.TypeChecker
     Smarrow.Utils
     Smarrow.Value
-    Smarrow.Deploy.Config
-    Smarrow.Deploy.PendingRequests
-    Smarrow.Deploy.Event
-    Smarrow.Deploy.EventLoop
-    Smarrow.Deploy.Transport
-    Smarrow.Deploy.Codec
-    Smarrow.Deploy.EventQueue
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -91,25 +91,25 @@ library
     , base              ^>=4.17.0.0
     , bytestring
     , containers
+    , directory
+    , stm
     , template-haskell
     , text
-    , unix
-    , transformers
     , time
-    , stm
-    , directory
+    , transformers
+    , unix
 
   build-depends:
-    , async
     , aeson
+    , async
+    , flatparse
+    , http-client
+    , http-types
+    , optparse-applicative
     , random
     , vector
     , wai
-    , flatparse
     , warp
-    , http-types
-    , http-client
-    , optparse-applicative
 
   -- Directories containing source files.
   hs-source-dirs:   src
@@ -118,27 +118,23 @@ library
   default-language: Haskell2010
 
 executable smarrow
-  -- Import common warning flags.
   import:           warnings
-
-  -- .hs or .lhs file containing the Main module.
+  hs-source-dirs:   app/cli
   main-is:          Main.hs
-
-  -- Modules included in this executable, other than Main.
-  -- other-modules:
-
-  -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:
-
-  -- Other library packages from which modules are imported.
   build-depends:
     , base          ^>=4.17.0.0
     , smarrow-lang
 
-  -- Directories containing source files.
-  hs-source-dirs:   app
+  default-language: Haskell2010
 
-  -- Base language which the package is written in.
+executable smarrow-deploy
+  import:           warnings
+  hs-source-dirs:   app/deploy
+  main-is:          Main.hs
+  build-depends:
+    , base          ^>=4.17.0.0
+    , smarrow-lang
+
   default-language: Haskell2010
 
 test-suite test
