@@ -72,6 +72,13 @@ library
     Smarrow.TypeChecker
     Smarrow.Utils
     Smarrow.Value
+    Smarrow.Deploy.Config
+    Smarrow.Deploy.PendingRequests
+    Smarrow.Deploy.Event
+    Smarrow.Deploy.EventLoop
+    Smarrow.Deploy.Transport
+    Smarrow.Deploy.Codec
+    Smarrow.Deploy.EventQueue
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -86,10 +93,23 @@ library
     , containers
     , template-haskell
     , text
+    , unix
     , transformers
+    , time
+    , stm
+    , directory
 
   build-depends:
+    , async
+    , aeson
+    , random
+    , vector
+    , wai
     , flatparse
+    , warp
+    , http-types
+    , http-client
+    , optparse-applicative
 
   -- Directories containing source files.
   hs-source-dirs:   src

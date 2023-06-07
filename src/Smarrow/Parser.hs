@@ -21,13 +21,16 @@ import Smarrow.Value
 runParser :: Parser a -> B.ByteString -> Result Error a
 runParser = FP.runParser
 
+runParser_ :: Parser a -> B.ByteString -> Either String a
+runParser_ p bs =
+  case runParser p bs of
+    Err e  -> Left $ prettyError bs e
+    OK a _ -> Right a
+    Fail   -> Left "Uncaught parse error"
+
 -- | Run parser, print pretty error on failure.
 testParser :: Show a => Parser a -> String -> Either String a
-testParser p str = case strToUtf8 str of
-  b -> case runParser p b of
-    Err e  -> Left $ prettyError b e
-    OK a _ -> Right a
-    Fail   -> Left "uncaught parse error"
+testParser p str = runParser_ p (strToUtf8 str)
 
 testParserIO :: Show a => Parser a -> String -> IO ()
 testParserIO p str = case strToUtf8 str of
