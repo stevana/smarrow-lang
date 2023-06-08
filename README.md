@@ -80,18 +80,50 @@ Deploying and upgrading over SSH should work similarly to REPL/localhost.
 
 ### Arrow notation
 
+State machines are to `smarrow` what functions are to functional programing
+languages. A state machine has the type:
+
+```haskell
+  input -> state -> (state, output)
+```
+
+It's a bit clunky to have to thread through the state explicitly though. We
+could have used a state monad and thereby get do-notation, which would improve
+the egonomics of writing state machines, but in `smarrow` we go down an other
+path and use arrow notation instead for reasons we shall explain next.
+
 ### Hot-code swapping
+
+Conal Elliott's work on [compiling to
+categories](http://conal.net/papers/compiling-to-categories/) shows how `Arrow`s
+that don't use `arr` can be compiled to first-order combinators (Cartesian
+closed categories).
+
+We use this fact to compile our state machines (which are `Arrow`s that don't
+use `arr`) to a bytecode inspired by Cartesian closed categories. This bytecode
+can be sent over the write to remote nodes and update state machines without
+downtime, similar to hot-code swapping à la Erlang.
 
 ### Adapters
 
-* REPL
-* Console
-* HTTP
+State machines are pure, if we want them to do something useful we must hook
+them up to inputs from the "real world". Adapters allow us to turn, for example,
+an HTTP server request into an input which we can then feed to a state machine
+and reply to the request using the output that the state machine produced.
+
+Similary console I/O or a REPL could be used as adapters.
+
+### Simulation testing
+
+### Time-travelling debugger
 
 ### Deployments
 
 `smarrow deploy <source-file> <deployment-name> [<host>][:<port>]`
+
 `smarrow call <deployment-name> <input>`
+
+### Supervision trees
 
 ### Upgrades
 
@@ -103,13 +135,11 @@ Can we do what Joe suggests:
 
 But on a state machine level instead of function level?
 
-### Pipelining
+### Horizonal composition -- pipelining
 
 XXX: Horizontally compose state machines.
 
-### Supervision trees
-
-### Time-travelling debugger
+### Vertical composition
 
 ## Contributing
 

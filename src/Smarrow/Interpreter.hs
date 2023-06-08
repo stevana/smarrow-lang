@@ -64,3 +64,8 @@ run :: CCC -> Value -> Value -> Value
 run c input state = PairV state' output
   where
     (output, state') = runState (eval c input) state
+
+------------------------------------------------------------------------
+
+-- Possible optimisations:
+-- https://stefan-marr.de/2023/06/squeezing-a-little-more-performance-out-of-bytecode-interpreters/
