@@ -115,17 +115,40 @@ Similary console I/O or a REPL could be used as adapters.
 
 ### Simulation testing
 
+Another useful adaptor is to deploy a bunch of communicating state machines on a
+fake network where all messages are kept in an in-memory priorty queue sorted by
+arrival time. We can then simulate the network, by popping the queue, advancing
+the clock to the arrival time, feed it to the receiving state machine, collect
+the outputs, generate arrival times for the outputs and feed them back into the
+queue. The arrival times are generated using a pseudo number generater fed with
+a seed, this allows us to determinstically get different interleaving of
+messages. The fact that we advance the clock to the arrival time makes timeouts
+happen without having to wait for them, which is useful when combined with fault
+injection of network faults. Essentially this gives us a discrete-event
+simulation, which is much faster than testing using Jepsen and is determinstic
+too!
+
 ### Time-travelling debugger
 
-### Deployments
+If we record all inputs that we feed the state machines, then we can implement a
+time-travelling debugger by merely feeding the inputs one-by-one to the state
+machines and observing how the states change over time.
+
+We can use snapshots and fixed sized ring-buffers of inputs in case there are
+too many inputs to store then all.
+
+### Deployments via supervision trees
 
 `smarrow deploy <source-file> <deployment-name> [<host>][:<port>]`
 
 `smarrow call <deployment-name> <input>`
 
-### Supervision trees
 
 ### Upgrades
+
+After a system is deployed it will likely need to be upgraded.
+
+XXX: we already talked about hot-code swapping...
 
 * Patches vs upgrades, semantically check inputs and outputs for changes?
 
@@ -134,6 +157,18 @@ Can we do what Joe suggests:
   https://erlang.org/pipermail/erlang-questions/2011-May/058768.html
 
 But on a state machine level instead of function level?
+
+### Protocols
+
+A state machines input type essentially defines its API, it doesn't say anything
+about which sequences of inputs are allowed. Consider the POSIX filesystem API
+where we can open a file to get a file handle, which we can then read and write
+to, at the end we are supposed to close the file handle and once closed no
+further reads or writes are allowed. These legal sequences of inputs define the
+protocol. One way to encode protocols is by means of a state machines.
+
+Protocols can be enforced at run-time by protocol checkers that sit in-between
+state machines.
 
 ### Horizonal composition -- pipelining
 
@@ -148,6 +183,7 @@ If any of this sounds interesting, feel free to get in touch.
 
 ## See also
 
+* The P programming language
 * https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/arrows.html
 * https://www.haskell.org/arrows/sugar.html
 * https://hackage.haskell.org/package/arrowp-qq-0.3.0/src/
