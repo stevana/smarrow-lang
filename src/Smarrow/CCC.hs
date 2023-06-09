@@ -31,7 +31,7 @@ data CCC
 
   | Get
   | Put
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 simplify1 :: CCC -> CCC
 simplify1 (Id :&&& Id) = Dup

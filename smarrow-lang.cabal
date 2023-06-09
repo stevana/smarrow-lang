@@ -67,6 +67,7 @@ library
     Smarrow.Deploy.Event
     Smarrow.Deploy.EventLoop
     Smarrow.Deploy.EventQueue
+    Smarrow.Deploy.HttpClient
     Smarrow.Deploy.PendingRequests
     Smarrow.Deploy.Transport
     Smarrow.Environment

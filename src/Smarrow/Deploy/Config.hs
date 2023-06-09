@@ -12,11 +12,12 @@ import Smarrow.Value
 
 ------------------------------------------------------------------------
 
+newtype SMId = SMId ByteString
+  deriving (Eq, Ord, Read)
+
 data Config = Config
   { cConfig :: Map SMId StateMachine
   }
-
-type SMId = ByteString
 
 data StateMachine = StateMachine
   { smCode  :: CCC

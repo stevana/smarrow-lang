@@ -19,11 +19,11 @@ eventLoop :: Int -> IO ()
 eventLoop port = do
   let cfg0 = emptyConfig
   eq <- newStmEventQueue
-  t  <- newHttpTransport
-  let c = parserPrettyCodec
+  t  <- newHttpTransport port
+  let c = readShowCodec
 
   let producer :: IO ()
-      producer = tStart t port eq
+      producer = tStart t eq
 
       consumer :: Config -> IO ()
       consumer cfg = do
@@ -36,13 +36,19 @@ eventLoop port = do
 
 handleEvent :: Config -> Transport -> Codec -> Event -> IO Config
 handleEvent cfg t c ev = case ev of
-  InputEv from bs -> case cDecode c bs of
+  InputEv from bs -> case cDecodeInput c bs of
     Left err -> do
       putStrLn ("Decode error: " ++ err)
+      -- XXX: perhaps this shouldn't return ok200? Tag the response?
       tRespond t from ("Decode error: " <> fromString err)
       return cfg
-    Right input -> do
-      let (cfg', output) = stepSM "0" input cfg -- XXX: hardcoded sm id
-      tRespond t from (cEncode c output)
+    Right (Input smId input) -> do
+      let (cfg', output) = stepSM smId input cfg
+      tRespond t from (cEncodeOutput c output)
       return cfg'
+  SpawnEv bs -> case cDecodeSpawn c bs of
+    Left err -> undefined
+    Right (Spawn smId code initState) ->
+      return (spawnSM smId code initState cfg)
+  UpgradeEv {} -> undefined
   QuitEv -> exitSuccess

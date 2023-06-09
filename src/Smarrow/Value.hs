@@ -18,7 +18,7 @@ data Value
   | Product [Value]
   | Inject ConName Int Value
   | ConV ConName
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 pattern IntV :: Int -> Value
 pattern IntV i = LitV (Int i)

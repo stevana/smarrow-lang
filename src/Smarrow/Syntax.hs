@@ -36,13 +36,13 @@ newtype MachineName = MachineName Text
   deriving (Eq, Ord, Show, IsString)
 
 data Lit = Int Int | Char Char
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data UnaryOp = Not | Negate
   deriving (Eq, Show)
 
 data BinOp = Add | Mult | And | Or | Eq | Lt
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data Expr
   = LitE Lit
@@ -109,7 +109,7 @@ data TypeSig = TypeSig [ConName]
   deriving (Eq, Show)
 
 newtype ConName = ConName ByteString
-  deriving (Eq, Show, IsString)
+  deriving (Eq, Show, Read, IsString)
 
 data Alt = Alt Pat GuardedAlts [Decl]
   deriving (Eq, Show)
