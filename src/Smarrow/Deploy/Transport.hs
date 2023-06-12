@@ -43,18 +43,20 @@ newtype NodeId = NodeId Int -- XXX
 app :: PendingRequests -> EventQueue -> Application
 app pr eq req respond =
   case requestMethod req of
-     "POST" -> do
-       reqBody <- consumeRequestBodyStrict req
-       (fromClientId, resp) <- addPendingRequest pr
-       -- time <- cGetCurrentTime clock
-       eqEnqueue eq (InputEv fromClientId (LBS.toStrict reqBody))
-       -- (NetworkEvent toNodeId (ClientRequest time fromClientId reqBody)))
-       mBs <- timeout (60_000_000) (takeMVar resp) -- 60s
-       removePendingRequest pr fromClientId
-       case mBs of
-         Nothing -> do
-           putStrLn "Client response timed out..."
-           respond (responseLBS status500 [] "Timeout due to overload or bug")
-         Just bs -> respond (responseLBS status200 [] (LBS.fromStrict bs))
-     -- XXX: produce spawn event
+     "POST"     -> request InputEv
+     "PUT"      -> request SpawnEv
      _otherwise -> respond (responseLBS status400 [] "Unsupported method")
+  where
+    request ev = do
+      reqBody <- consumeRequestBodyStrict req
+      (fromClientId, resp) <- addPendingRequest pr
+      -- time <- cGetCurrentTime clock
+      eqEnqueue eq (ev fromClientId (LBS.toStrict reqBody))
+      -- (NetworkEvent toNodeId (ClientRequest time fromClientId reqBody)))
+      mBs <- timeout (60_000_000) (takeMVar resp) -- 60s
+      removePendingRequest pr fromClientId
+      case mBs of
+        Nothing -> do
+          putStrLn "Client response timed out..."
+          respond (responseLBS status500 [] "Timeout due to overload or bug")
+        Just bs -> respond (responseLBS status200 [] (LBS.fromStrict bs))

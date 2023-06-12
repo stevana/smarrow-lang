@@ -13,6 +13,6 @@ import Smarrow.Value
 
 data Event
   = InputEv   ClientId ByteString
-  | SpawnEv   ByteString
-  | UpgradeEv ByteString
+  | SpawnEv   ClientId ByteString
+  | UpgradeEv ClientId ByteString
   | QuitEv

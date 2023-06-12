@@ -36,19 +36,20 @@ eventLoop port = do
 
 handleEvent :: Config -> Transport -> Codec -> Event -> IO Config
 handleEvent cfg t c ev = case ev of
-  InputEv from bs -> case cDecodeInput c bs of
+  InputEv cid bs -> case cDecodeInput c bs of
     Left err -> do
       putStrLn ("Decode error: " ++ err)
       -- XXX: perhaps this shouldn't return ok200? Tag the response?
-      tRespond t from ("Decode error: " <> fromString err)
+      tRespond t cid ("Decode error: " <> fromString err)
       return cfg
     Right (Input smId input) -> do
       let (cfg', output) = stepSM smId input cfg
-      tRespond t from (cEncodeOutput c output)
+      tRespond t cid (cEncodeOutput c output)
       return cfg'
-  SpawnEv bs -> case cDecodeSpawn c bs of
+  SpawnEv cid bs -> case cDecodeSpawn c bs of
     Left err -> undefined
-    Right (Spawn smId code initState) ->
+    Right (Spawn smId code initState) -> do
+      tRespond t cid "spawned"
       return (spawnSM smId code initState cfg)
   UpgradeEv {} -> undefined
   QuitEv -> exitSuccess

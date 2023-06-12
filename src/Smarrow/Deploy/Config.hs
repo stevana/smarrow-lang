@@ -1,10 +1,12 @@
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Smarrow.Deploy.Config where
 
 import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.String (IsString)
 
 import Smarrow.CCC
 import Smarrow.Interpreter
@@ -13,7 +15,7 @@ import Smarrow.Value
 ------------------------------------------------------------------------
 
 newtype SMId = SMId ByteString
-  deriving (Eq, Ord, Read)
+  deriving (Eq, Ord, Show, Read, IsString)
 
 data Config = Config
   { cConfig :: Map SMId StateMachine
