@@ -73,5 +73,16 @@ unit_ifEq2 = "proc i -> if i == 2 then return -< True else return -< False" @ "2
 
 ------------------------------------------------------------------------
 
-unit_incrState :: Assertion
-unit_incrState = "proc () -> do { i <- get -< (); j <- put -< i + 1; return -< j }" @ "()" @ "0" ~~> "(1, ())"
+unit_counterRead :: Assertion
+unit_counterRead =
+  "proc i -> case i of { True  -> do { i <- get -< (); put -< i + 1 }; False -> get -< () }"
+  @ "False"
+  @ "0"
+  ~~> "(0, 0)"
+
+unit_counterIncr :: Assertion
+unit_counterIncr =
+  "proc i -> case i of { True  -> do { i <- get -< (); put -< i + 1 }; False -> get -< () }"
+  @ "True"
+  @ "0"
+  ~~> "(1, ())"

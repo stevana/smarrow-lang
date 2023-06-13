@@ -38,8 +38,9 @@ stepSM smid input cfg =
   let
     sm                  = cConfig cfg Map.! smid
     PairV state' output = run (smCode sm) input (smState sm)
+    cfg' = cfg { cConfig = Map.insert smid sm { smState = state' } (cConfig cfg) }
   in
-    (cfg, output)
+    (cfg', output)
 
 spawnSM :: SMId -> CCC -> Value -> Config -> Config
 spawnSM smid code state cfg =

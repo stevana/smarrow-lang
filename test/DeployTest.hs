@@ -11,6 +11,7 @@ import Smarrow.Translate
 
 ------------------------------------------------------------------------
 
+-- XXX: Proper constructors for Incr and Read.
 counterCode :: String
 counterCode = unlines
   ["proc i -> case i of"
