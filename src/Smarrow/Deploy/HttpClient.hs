@@ -67,7 +67,7 @@ spawn (Client mgr req c) smid code state = do
 
 upgrade :: Client -> SMId -> CCC -> CCC -> CCC -> IO ()
 upgrade (Client mgr req c) smid oldCode newCode stateMigration = do
-  let body = RequestBodyBS (cEncodeUpgrade c (Upgrade smid newCode oldCode stateMigration))
+  let body = RequestBodyBS (cEncodeUpgrade c (Upgrade smid oldCode newCode stateMigration))
   resp <- httpLbs req { method = "PATCH", requestBody = body } mgr
   if responseStatus resp == ok200
   then return ()

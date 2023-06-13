@@ -58,7 +58,8 @@ handleEvent cfg t c ev = case ev of
       tRespond t cid "spawned"
       return (spawnSM smid code initState cfg)
   UpgradeEv cid bs ->
-    withSuccessDecode (cDecodeUpgrade c) cid bs $ \(Upgrade smid oldCode newCode stateMigration) ->
+    withSuccessDecode (cDecodeUpgrade c) cid bs $ \(Upgrade smid oldCode newCode stateMigration) -> do
+      tRespond t cid "upgraded"
       return (upgradeSM smid oldCode newCode stateMigration cfg)
   QuitEv -> exitSuccess
   where
