@@ -34,13 +34,21 @@ emptyConfig = Config
   }
 
 stepSM :: SMId -> Value -> Config -> (Config, Value)
-stepSM smId input cfg =
+stepSM smid input cfg =
   let
-    sm                  = cConfig cfg Map.! smId
+    sm                  = cConfig cfg Map.! smid
     PairV state' output = run (smCode sm) input (smState sm)
   in
     (cfg, output)
 
 spawnSM :: SMId -> CCC -> Value -> Config -> Config
-spawnSM smId code state cfg =
-  cfg { cConfig = Map.insert smId (StateMachine code state) (cConfig cfg) }
+spawnSM smid code state cfg =
+  cfg { cConfig = Map.insert smid (StateMachine code state) (cConfig cfg) }
+
+upgradeSM :: SMId -> CCC -> CCC -> CCC -> Config -> Config
+upgradeSM smid oldCode newCode stateMigration cfg =
+  cfg { cConfig = Map.insert smid (StateMachine newCode migratedState) (cConfig cfg) }
+  where
+    sm = cConfig cfg Map.! smid
+    -- XXX: Support for migrations that use state?
+    PairV _unit migratedState = run stateMigration (smState sm) UnitV
