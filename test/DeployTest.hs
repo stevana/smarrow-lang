@@ -33,18 +33,19 @@ unit_deployCounter :: Assertion
 unit_deployCounter = withEventLoop port $ do
   c <- newTestClient port
   case (testParser pSrc' counterCode, testParser pSrc' counterCode2) of
-    (Left err, _) -> fail err
+    (Left err, _)  -> fail err
     (_,  Left err) -> fail err
     (Right counterExpr, Right counterExpr2) -> do
-      let counter  = translate counterExpr
+      let smid     = "counter"
+          counter  = translate counterExpr
           counter2 = translate counterExpr2
-      spawn c "counter" counter (IntV 0)
-      _resp <- call_ c "counter" (ConV "True")
-      resp  <- call_ c "counter" (ConV "False")
+      spawn c smid counter (IntV 0)
+      _resp <- call_ c smid (ConV "True")
+      resp  <- call_ c smid (ConV "False")
       resp @?= IntV 1
-      upgrade c "counter" counter counter2 Id
-      _resp <- call_ c "counter" (ConV "True")
-      resp2  <- call_ c "counter" (ConV "False")
+      upgrade c smid counter counter2 Id
+      _resp  <- call_ c smid (ConV "True")
+      resp2  <- call_ c smid (ConV "False")
       resp2 @?= IntV 3
   where
     port = 8000
