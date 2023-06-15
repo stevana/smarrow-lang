@@ -23,58 +23,39 @@ program distributed systems.
 
 ## Getting started
 
-(This isn't implemented yet, it's merely an exercise in wishful thinking. Have a
-look at the testsuite to see what's actually working.)
-
 ```haskell
-$ cat example.smarr
+$ cabal run smarrow-deploy &
+$ cat example/counter.smarr
 
-data Input  = Incr | Read
-data Output = Ack | Val Int
-data State  = Int
-
-main = proc i -> case i of
-         Incr -> do
-           n <- get -< ()
-           put -< n + 1
-           return -< Ack
-         Read -> do
-           n <- get -< ()
-           return -< Val n
+proc i -> case i of
+  True  -> do { i <- get -< (); put -< i + 1 }
+  False -> get -< ()
 ```
 ```bash
-$ smarrow deploy repl example.smarr
-> Read
-0
-> Incr
-()
-> Read
-1
+$ cabal run smarrow -- deploy counter example/counter.smarr
+Deployed: counter
+$ cabal run smarrow -- invoke counter True
+UnitV
+$ cabal run smarrow -- invoke counter False
+LitV (Int 1)
 ```
-
-In a different terminal:
-
 ```diff
-$ smarrow deployments
-Current deployments:
-  1. repl example.smarr 9faa7caca5a5e053bc84d5ca2731ce32ea1b265f
-$ diff -u example.smarr example2.smarr
+$ diff -u example/counter.smarr example/counter2.smarr
 -   put -< n + 1
 +   put -< n + 2
-$ smarrow upgrade repl example.smarr example2.smarr
-Update successful!
+$ cabal run smarrow -- upgrade counter example/counter.smarr \
+                                       example/counter2.smarr \
+                                       example/counter-state-migration.smarr
+Upgraded: counter
 ```
-
-Back in the REPL terminal:
-
 ```bash
-> Incr
-()
-> Read
-3
+$ cabal run smarrow -- invoke counter False
+LitV (Int 1)
+$ cabal run smarrow -- invoke counter True
+UnitV
+$ cabal run smarrow -- invoke counter False
+LitV (Int 3)
 ```
-
-Deploying and upgrading over SSH should work similarly to REPL/localhost.
 
 ## Features
 
