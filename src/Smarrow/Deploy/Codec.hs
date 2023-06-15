@@ -28,7 +28,7 @@ data Input = Input
   deriving (Show, Read)
 
 data Output = Output
-  { oOutput   :: Value
+  { oOutput :: Value
   }
   deriving (Show, Read)
 

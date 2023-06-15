@@ -180,6 +180,18 @@ XXX: Horizontally compose state machines.
 
 If any of this sounds interesting, feel free to get in touch.
 
+### To do
+
+* cli
+  - rustup?
+* encryption
+* tunnel
+* migrate deployment
+  - automatic failover?
+* api evolution
+* observability
+* debugger
+
 
 ## See also
 

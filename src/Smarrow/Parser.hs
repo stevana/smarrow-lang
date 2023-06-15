@@ -1,15 +1,20 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Smarrow.Parser where
 
-import qualified Data.ByteString as B
+import Control.Exception
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
 import Data.Char (ord)
-import Data.Functor
+import Data.Functor (($>))
+import System.Exit
 
-import FlatParse.Basic hiding (Parser, char, cut, runParser, string)
+import FlatParse.Basic hiding
+       (Parser, char, cut, err, runParser, string)
 import qualified FlatParse.Basic as FP
 
 import Smarrow.Lexer
@@ -18,10 +23,34 @@ import Smarrow.Value
 
 --------------------------------------------------------------------------------
 
-runParser :: Parser a -> B.ByteString -> Result Error a
+parseFile_ :: FilePath -> IO Expr
+parseFile_ fp = do
+  r <- parseFile fp
+  case r of
+    Left err -> do
+      putStrLn err
+      exitFailure
+    Right expr -> return expr
+
+parseFile :: FilePath -> IO (Either String Expr)
+parseFile fp = fmap (runParser_ pSrc') (BS.readFile fp)
+  `catch` \(err :: IOError) -> return (Left (displayException err))
+
+parseValue_ :: ByteString -> IO Value
+parseValue_ bs = do
+  case parseValue bs of
+    Left err -> do
+      putStrLn err
+      exitFailure
+    Right value -> return value
+
+parseValue :: ByteString -> Either String Value
+parseValue = runParser_ pValue'
+
+runParser :: Parser a -> ByteString -> Result Error a
 runParser = FP.runParser
 
-runParser_ :: Parser a -> B.ByteString -> Either String a
+runParser_ :: Parser a -> ByteString -> Either String a
 runParser_ p bs =
   case runParser p bs of
     Err e  -> Left $ prettyError bs e
@@ -46,7 +75,7 @@ testParserIO p str = case strToUtf8 str of
 
 -- Also see: https://www.haskell.org/onlinereport/haskell2010/haskellch10.html
 
-type Name = B.ByteString
+type Name = ByteString
 
 -- | Parse an identifier. This parser uses `isKeyword` to check that an identifier is not a
 --   keyword.

@@ -4,6 +4,7 @@
 module Smarrow.Deploy.Config where
 
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as BS8
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.String (IsString)
@@ -16,6 +17,9 @@ import Smarrow.Value
 
 newtype SMId = SMId ByteString
   deriving (Eq, Ord, Show, Read, IsString)
+
+displaySMId :: SMId -> String
+displaySMId (SMId bs) = BS8.unpack bs
 
 data Config = Config
   { cConfig :: Map SMId StateMachine

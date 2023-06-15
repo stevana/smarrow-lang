@@ -19,6 +19,11 @@ import Smarrow.Translate
 
 ------------------------------------------------------------------------
 
+eventLoopNoReady :: Int -> IO ()
+eventLoopNoReady port = do
+  ready <- newEmptyMVar
+  eventLoop port ready
+
 eventLoop :: Int -> MVar () -> IO ()
 eventLoop port ready = do
   let cfg0 = emptyConfig
