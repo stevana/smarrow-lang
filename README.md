@@ -1,8 +1,8 @@
 # smarrow-lang
 
 `smarrow-lang` is an experimental programming language where programs are state
-machines expressed in
-[arrow notation](https://www.haskell.org/arrows/syntax.html).
+machines expressed in [arrow
+notation](https://www.haskell.org/arrows/syntax.html).
 
 State machines communicate with each other by sending messages, a bit like
 Erlang processes but with more restrictions. For example, a state machine may
@@ -35,9 +35,9 @@ proc i -> case i of
 $ cabal run smarrow -- deploy counter example/counter.smarr
 Deployed: counter
 $ cabal run smarrow -- invoke counter True
-UnitV
+()
 $ cabal run smarrow -- invoke counter False
-LitV (Int 1)
+1
 ```
 ```diff
 $ diff -u example/counter.smarr example/counter2.smarr
@@ -50,11 +50,11 @@ Upgraded: counter
 ```
 ```bash
 $ cabal run smarrow -- invoke counter False
-LitV (Int 1)
+1
 $ cabal run smarrow -- invoke counter True
-UnitV
+()
 $ cabal run smarrow -- invoke counter False
-LitV (Int 3)
+3
 ```
 
 ## Features
@@ -163,6 +163,7 @@ If any of this sounds interesting, feel free to get in touch.
 
 ### To do
 
+* pretty printer
 * cli
   - rustup?
 * encryption

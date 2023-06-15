@@ -3,12 +3,13 @@ module Smarrow.LibMain where
 import Data.ByteString (ByteString)
 import Options.Applicative
 
-import Smarrow.Parser (parseFile_, parseValue_)
-import Smarrow.Deploy.HttpClient (newClient, spawn, call_, upgrade)
 import Smarrow.Deploy.Codec (readShowCodec)
+import Smarrow.Deploy.Config (SMId, displaySMId)
+import Smarrow.Deploy.HttpClient (call_, newClient, spawn, upgrade)
+import Smarrow.Parser (parseFile_, parseValue_)
+import Smarrow.PrettyPrint
 import Smarrow.Translate
 import Smarrow.Value
-import Smarrow.Deploy.Config (SMId, displaySMId)
 
 ------------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ libMain = go . oCommand =<< execParser infoOpts
       c <- newClient host readShowCodec
       input' <- parseValue_ input
       output <- call_ c smid input'
-      print output
+      putStrLn (prettyValue output)
 
     upgradeCmd (UpgradeOptions smid host oldCode newCode stateMigration) = do
       c <- newClient host readShowCodec

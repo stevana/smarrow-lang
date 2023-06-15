@@ -74,6 +74,7 @@ library
     Smarrow.Lexer
     Smarrow.LibMain
     Smarrow.Parser
+    Smarrow.PrettyPrint
     Smarrow.Syntax
     Smarrow.Translate
     Smarrow.TypeChecker

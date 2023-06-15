@@ -111,6 +111,9 @@ data TypeSig = TypeSig [ConName]
 newtype ConName = ConName ByteString
   deriving (Eq, Show, Read, IsString)
 
+unConName :: ConName -> ByteString
+unConName (ConName bs) = bs
+
 data Alt = Alt Pat GuardedAlts [Decl]
   deriving (Eq, Show)
 
