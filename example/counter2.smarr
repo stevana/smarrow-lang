@@ -1,0 +1,4 @@
+proc i -> case i of
+  { True  -> do { i <- get -< (); put -< i + 2 }
+  ; False -> get -< ()
+  }

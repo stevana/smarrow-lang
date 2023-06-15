@@ -4,7 +4,7 @@ import Data.ByteString (ByteString)
 import Options.Applicative
 
 import Smarrow.Parser (parseFile_, parseValue_)
-import Smarrow.Deploy.HttpClient (newClient, spawn, call_)
+import Smarrow.Deploy.HttpClient (newClient, spawn, call_, upgrade)
 import Smarrow.Deploy.Codec (readShowCodec)
 import Smarrow.Translate
 import Smarrow.Value
@@ -15,22 +15,20 @@ import Smarrow.Deploy.Config (SMId, displaySMId)
 data Options = Options
   { oCommand :: Command
   }
-  deriving Show
 
 data Command
-  = Check  CheckOptions
-  | Deploy DeployOptions
-  | Invoke InvokeOptions
-  deriving Show
+  = Check   CheckOptions
+  | Deploy  DeployOptions
+  | Invoke  InvokeOptions
+  | Upgrade UpgradeOptions
 
 data CheckOptions = CheckOptions FilePath
-  deriving Show
 
 data DeployOptions = DeployOptions SMId FilePath String
-  deriving Show
 
 data InvokeOptions = InvokeOptions SMId String ByteString
-  deriving Show
+
+data UpgradeOptions = UpgradeOptions SMId String FilePath FilePath FilePath
 
 ------------------------------------------------------------------------
 
@@ -38,9 +36,10 @@ libMain :: IO ()
 libMain = go . oCommand =<< execParser infoOpts
   where
     go :: Command -> IO ()
-    go (Check  copts) = checkCmd  copts
-    go (Deploy dopts) = deployCmd dopts
-    go (Invoke iopts) = invokeCmd iopts
+    go (Check   copts) = checkCmd   copts
+    go (Deploy  dopts) = deployCmd  dopts
+    go (Invoke  iopts) = invokeCmd  iopts
+    go (Upgrade uopts) = upgradeCmd uopts
 
     checkCmd (CheckOptions fp) = do
       _expr <- parseFile_ fp
@@ -60,6 +59,14 @@ libMain = go . oCommand =<< execParser infoOpts
       output <- call_ c smid input'
       print output
 
+    upgradeCmd (UpgradeOptions smid host oldCode newCode stateMigration) = do
+      c <- newClient host readShowCodec
+      oldCode' <- translate <$> parseFile_ oldCode
+      newCode' <- translate <$> parseFile_ newCode
+      stateMigration' <- translate <$> parseFile_ stateMigration
+      upgrade c smid oldCode' newCode' stateMigration'
+      putStrLn ("Upgraded: " ++ displaySMId smid)
+
 infoOpts :: ParserInfo Options
 infoOpts = info (opts <**> helper)
   ( fullDesc
@@ -68,9 +75,10 @@ infoOpts = info (opts <**> helper)
 
 opts :: Parser Options
 opts = Options <$> hsubparser
-  (  command "check"  (info (Check  <$> checkOpts)  (progDesc "Check a state machine"))
-  <> command "deploy" (info (Deploy <$> deployOpts) (progDesc "Deploy a state machine"))
-  <> command "invoke" (info (Invoke <$> invokeOpts) (progDesc "Invoke a state machine")) )
+  (  command "check"   (info (Check   <$> checkOpts)   (progDesc "Check a state machine"))
+  <> command "deploy"  (info (Deploy  <$> deployOpts)  (progDesc "Deploy a state machine"))
+  <> command "invoke"  (info (Invoke  <$> invokeOpts)  (progDesc "Invoke a state machine"))
+  <> command "upgrade" (info (Upgrade <$> upgradeOpts) (progDesc "Upgrade a state machine")) )
 
 checkOpts :: Parser CheckOptions
 checkOpts = CheckOptions
@@ -107,5 +115,26 @@ invokeOpts = InvokeOptions
   <*> strArgument
         (  metavar "INPUT"
         <> help "The input for the state machine" )
+
+upgradeOpts :: Parser UpgradeOptions
+upgradeOpts = UpgradeOptions
+  <$> strArgument
+        (  metavar "SMID"
+        <> help "The state machine id" )
+  <*> strOption
+        (  long "host"
+        <> short 'h'
+        <> metavar "HOST"
+        <> help "The host URI"
+        <> value "http://localhost:8080" )
+  <*> strArgument
+        (  metavar "FILE"
+        <> help "The old source file" )
+  <*> strArgument
+        (  metavar "FILE"
+        <> help "The new source file" )
+  <*> strArgument
+        (  metavar "FILE"
+        <> help "The state migration source file" )
 
 -- XXX: simpleVersioner
