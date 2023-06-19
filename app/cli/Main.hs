@@ -1,6 +1,6 @@
 module Main where
 
-import Smarrow.LibMain
+import Smarrow.CLI.LibMain
 
 ------------------------------------------------------------------------
 

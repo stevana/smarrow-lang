@@ -4,11 +4,10 @@ module DeployTest where
 
 import Test.Tasty.HUnit
 
-import Smarrow.CCC
+import Smarrow.AST
 import Smarrow.Deploy
 import Smarrow.Parser
 import Smarrow.Translate
-import Smarrow.Value
 
 ------------------------------------------------------------------------
 

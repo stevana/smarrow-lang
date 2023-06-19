@@ -2,9 +2,11 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE StrictData #-}
 
-module Smarrow.Value where
+module Smarrow.AST.Value where
 
-import Smarrow.Syntax
+import Smarrow.AST.Literals
+import Smarrow.AST.Names
+import Smarrow.AST.Surface (BinOp)
 
 ------------------------------------------------------------------------
 

@@ -18,8 +18,7 @@ import FlatParse.Basic hiding
 import qualified FlatParse.Basic as FP
 
 import Smarrow.Lexer
-import Smarrow.Syntax
-import Smarrow.Value
+import Smarrow.AST
 
 --------------------------------------------------------------------------------
 
@@ -244,7 +243,7 @@ pCmd' = (pDo <|> pCase <|> pIf <|> pInput') `cut` ["cmd"]
           pat <- pPat
           $(symbol' "->")
           cmd <- pCmd'
-          return (Alt pat (UnguardedAlt cmd) [])
+          return (Alt pat (UnguardedAlt cmd))
 
     pIf :: Parser Cmd
     pIf = do

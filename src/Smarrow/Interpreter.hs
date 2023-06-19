@@ -3,10 +3,8 @@ module Smarrow.Interpreter where
 import Control.Monad
 import Control.Monad.Trans.State.Strict
 
-import Smarrow.CCC
-import Smarrow.Syntax
+import Smarrow.AST
 import Smarrow.Translate
-import Smarrow.Value
 
 ------------------------------------------------------------------------
 

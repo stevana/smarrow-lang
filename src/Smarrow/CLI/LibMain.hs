@@ -1,4 +1,4 @@
-module Smarrow.LibMain where
+module Smarrow.CLI.LibMain where
 
 import Data.ByteString (ByteString)
 import Options.Applicative
@@ -9,7 +9,7 @@ import Smarrow.Deploy.HttpClient (call_, newClient, spawn, upgrade)
 import Smarrow.Parser (parseFile_, parseValue_)
 import Smarrow.PrettyPrint
 import Smarrow.Translate
-import Smarrow.Value
+import Smarrow.AST.Value
 
 ------------------------------------------------------------------------
 

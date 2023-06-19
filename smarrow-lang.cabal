@@ -59,7 +59,14 @@ library
 
   -- Modules exported by the library.
   exposed-modules:
-    Smarrow.CCC
+    Smarrow.AST
+    Smarrow.AST.Core
+    Smarrow.AST.Literals
+    Smarrow.AST.Names
+    Smarrow.AST.Surface
+    Smarrow.AST.Types
+    Smarrow.AST.Value
+    Smarrow.CLI.LibMain
     Smarrow.Deploy
     Smarrow.Deploy.Codec
     Smarrow.Deploy.Config
@@ -72,14 +79,11 @@ library
     Smarrow.Environment
     Smarrow.Interpreter
     Smarrow.Lexer
-    Smarrow.LibMain
     Smarrow.Parser
     Smarrow.PrettyPrint
-    Smarrow.Syntax
     Smarrow.Translate
     Smarrow.TypeChecker
     Smarrow.Utils
-    Smarrow.Value
 
   -- Modules included in this library but not exported.
   -- other-modules:

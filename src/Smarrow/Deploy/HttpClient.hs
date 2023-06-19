@@ -19,10 +19,9 @@ import Network.HTTP.Client
        )
 import Network.HTTP.Types.Status
 
-import Smarrow.CCC
 import Smarrow.Deploy.Codec
 import Smarrow.Deploy.Config
-import Smarrow.Value
+import Smarrow.AST
 
 ------------------------------------------------------------------------
 

@@ -2,7 +2,7 @@
 
 module Smarrow.TypeChecker where
 
-import Smarrow.Syntax
+import Smarrow.AST
 
 ------------------------------------------------------------------------
 

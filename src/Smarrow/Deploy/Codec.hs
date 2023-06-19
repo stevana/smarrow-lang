@@ -4,8 +4,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS8
 import Text.Read
 
-import Smarrow.Value
-import Smarrow.CCC
+import Smarrow.AST
 import Smarrow.Deploy.Config (SMId)
 
 ------------------------------------------------------------------------

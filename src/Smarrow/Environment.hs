@@ -1,13 +1,31 @@
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Smarrow.Environment where
 
+import Data.ByteString (ByteString)
+import Data.String (IsString)
 import Control.Applicative ((<|>))
 import Data.List (findIndex)
 
-import Smarrow.CCC
-import Smarrow.Syntax
+import Smarrow.AST
+
+------------------------------------------------------------------------
+
+-- XXX: Move? Only used here.
+
+newtype TypeName = TypeName ByteString
+  deriving (Eq, Ord, Show, IsString)
+
+data TypeDecl = TypeDecl TypeName TypeSig
+  deriving (Eq, Show)
+
+boolTypeDecl :: TypeDecl
+boolTypeDecl = TypeDecl "Bool" (TypeSig ["True", "False"])
+
+data TypeSig = TypeSig [ConName]
+  deriving (Eq, Show)
 
 ------------------------------------------------------------------------
 

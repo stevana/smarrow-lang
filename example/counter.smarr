@@ -1,4 +1,12 @@
-proc i -> case i of
-  { True  -> do { i <- get -< (); put -< i + 1 }
-  ; False -> get -< ()
+machine Counter where
+
+state : Int = 0
+
+language
+  : Incr -> ()
+  | Read -> Int
+
+function i -> case i of
+  { Incr -> do { i <- get -< (); put -< i + 1 }
+  ; Read -> get -< ()
   }

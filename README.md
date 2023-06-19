@@ -164,10 +164,11 @@ If any of this sounds interesting, feel free to get in touch.
 ### To do
 
 * pretty printer
+  - and formatter?
 * cli
   - rustup?
 * encryption
-* tunnel
+* tunnel, https://tunnelto.dev?
 * migrate deployment
   - automatic failover?
 * api evolution

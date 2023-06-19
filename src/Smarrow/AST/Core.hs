@@ -1,8 +1,10 @@
 {-# LANGUAGE StrictData #-}
 
-module Smarrow.CCC where
+module Smarrow.AST.Core where
 
-import Smarrow.Syntax (BinOp, ConName, Lit)
+import Smarrow.AST.Surface (BinOp)
+import Smarrow.AST.Literals
+import Smarrow.AST.Names
 
 ------------------------------------------------------------------------
 

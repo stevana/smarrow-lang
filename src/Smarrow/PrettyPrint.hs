@@ -2,8 +2,7 @@ module Smarrow.PrettyPrint where
 
 import qualified Data.ByteString.Char8 as BS8
 
-import Smarrow.Value
-import Smarrow.Syntax
+import Smarrow.AST
 
 ------------------------------------------------------------------------
 

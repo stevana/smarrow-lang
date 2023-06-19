@@ -158,16 +158,18 @@ conNameChar = satisfyAscii (\c -> isLatinLetter c || isDigit c)
 isKeyword :: Span -> Parser ()
 isKeyword span0 = inSpan span0 $ do
   $(switch [| case _ of
-      "proc"   -> pure ()
-      "return" -> pure ()
-      "get"    -> pure ()
-      "put"    -> pure ()
-      -- "let"    -> pure ()
-      -- "in"     -> pure () -- XXX: causes: This binding for ‘c’ shadows the existing binding
-      "do"     -> pure ()
-      "if"     -> pure ()
-      "then"   -> pure ()
-      "else"   -> pure () |])
+      "function" -> pure ()
+      "state"    -> pure ()
+      "language" -> pure ()
+      "return"   -> pure ()
+      "get"      -> pure ()
+      "put"      -> pure ()
+      -- "let"      -> pure ()
+      -- "in"       -> pure () -- XXX: causes: This binding for ‘c’ shadows the existing binding
+      "do"       -> pure ()
+      "if"       -> pure ()
+      "then"     -> pure ()
+      "else"     -> pure () |])
   eof
 
 -- | Parse a non-keyword string.

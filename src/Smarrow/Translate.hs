@@ -2,12 +2,11 @@ module Smarrow.Translate where
 
 import Data.Function (on)
 import Data.List (sortBy)
+import Data.Set (Set)
 import qualified Data.Set as Set
 
-import Smarrow.CCC
 import Smarrow.Environment
-import Smarrow.Syntax
-import Smarrow.Value
+import Smarrow.AST
 
 ------------------------------------------------------------------------
 
@@ -49,7 +48,7 @@ trAlts :: Env -> Pat -> [Alt] -> [CCC]
 trAlts env pat alts = map snd (sortBy (compare `on` fst) (map (trAlt env pat) alts))
 
 trAlt :: Env -> Pat -> Alt -> (Int, CCC)
-trAlt env pat (Alt (ConNameP conName) (UnguardedAlt cmd) _decls) =
+trAlt env pat (Alt (ConNameP conName) (UnguardedAlt cmd)) =
   (conNameIndex env conName, tr env (Proc pat cmd))
 trAlt _env _pat alt = error (show alt)
 -- trAlt env (Alt pat            (UnguardedAlt cmd) _decls) = tr env (Proc pat cmd)
@@ -58,3 +57,30 @@ translateValueCons :: Env -> Value -> Value
 translateValueCons env (ConV conName) = Inject conName (conNameIndex env conName) UnitV
 -- ^ XXX: constructor arguments
 translateValueCons _env v = v
+
+------------------------------------------------------------------------
+
+-- XXX: Move? Only used here.
+
+fvP :: Pat -> Set Var
+fvP (VarP v)     = Set.singleton v
+fvP (TupleP p q) = fvP p `Set.union` fvP q
+fvP WildP        = Set.empty
+fvP (ConNameP _) = Set.empty
+fvP UnitP        = Set.empty
+
+fvE :: Expr -> Set Var
+fvE (Proc pat body) = fvC body `Set.difference` fvP pat
+fvE (VarE v)        = Set.singleton v
+fvE ReturnE         = Set.empty
+fvE (PairE l r)     = fvE l `Set.union` fvE r
+fvE IdE             = Set.empty
+fvE GetE            = Set.empty
+fvE PutE            = Set.empty
+fvE e = error (show e)
+
+fvC :: Cmd -> Set Var
+fvC (f :-< a)        = fvE f `Set.union` fvE a
+fvC (If b t f)       = fvE b `Set.union` fvC t `Set.union` fvC f
+fvC (Case _e _as)    = undefined
+fvC (Do _stmts _cmd) = undefined

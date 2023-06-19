@@ -8,7 +8,7 @@ import Smarrow.Environment
 import Smarrow.Interpreter
 import Smarrow.Parser
 import Smarrow.Translate
-import Smarrow.Value
+import Smarrow.AST
 
 ------------------------------------------------------------------------
 
