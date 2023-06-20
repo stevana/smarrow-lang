@@ -25,39 +25,51 @@ program distributed systems.
 
 ```haskell
 $ cabal run smarrow-deploy &
-$ cat example/counter.smarr
+$ cat example/Counter.smarr
 
-proc i -> case i of
-  True  -> do { i <- get -< (); put -< i + 1 }
-  False -> get -< ()
+machine Counter where
+
+state : Int = 0
+
+language
+  : Incr -> ()
+  | Read -> Int
+
+function i -> case i of
+  { Incr -> do { i <- get -< (); put -< i + 1 }
+  ; Read -> get -< ()
+  }
 ```
 ```bash
-$ cabal run smarrow -- deploy counter example/counter.smarr
+$ cabal run smarrow -- deploy counter example/Counter.smarr
 Deployed: counter
-$ cabal run smarrow -- invoke counter True
+$ cabal run smarrow -- invoke counter Incr
 ()
-$ cabal run smarrow -- invoke counter False
+$ cabal run smarrow -- invoke counter Read
 1
 ```
 ```diff
-$ diff -u example/counter.smarr example/counter2.smarr
+$ diff -u example/Counter.smarr example/Counter2.smarr
 -   put -< n + 1
 +   put -< n + 2
-$ cabal run smarrow -- upgrade counter example/counter.smarr \
-                                       example/counter2.smarr \
-                                       example/counter-state-migration.smarr
+$ cabal run smarrow -- deploy counter example/Counter2.smarr
 Upgraded: counter
 ```
 ```bash
-$ cabal run smarrow -- invoke counter False
+$ cabal run smarrow -- invoke counter Read
 1
-$ cabal run smarrow -- invoke counter True
+$ cabal run smarrow -- invoke counter Incr
 ()
-$ cabal run smarrow -- invoke counter False
+$ cabal run smarrow -- invoke counter Read
 3
 ```
 
 ## Features
+
+### First-class state machines
+
+In functional programming languages functions are first-class. In `smarrow` we
+experiment with making state machines first-class instead.
 
 ### Arrow notation
 
@@ -120,10 +132,24 @@ too many inputs to store then all.
 
 ### Deployments via supervision trees
 
-`smarrow deploy <source-file> <deployment-name> [<host>][:<port>]`
+XXX:
 
-`smarrow call <deployment-name> <input>`
+### No modules or packages
 
+A state machine is a unit of deployment, unlike a (pure) function. A state
+machine must be under version control before it can be deployed, it's therefore
+globally uniquely identifiable and therefore there's no need to further package
+it up.
+
+State machines carry automatically checked semantic versioning and other
+metadata making it possible to search for state machines, subscribe to
+(security) updates for ones that you've deployed, etc.
+
+See also:
+
+* https://erlang.org/pipermail/erlang-questions/2011-May/058768.html
+* https://lobste.rs/s/xi3mi0/does_programming_language_with_ml_style
+* Unison
 
 ### Upgrades
 
@@ -133,11 +159,7 @@ XXX: we already talked about hot-code swapping...
 
 * Patches vs upgrades, semantically check inputs and outputs for changes?
 
-Can we do what Joe suggests:
-
-  https://erlang.org/pipermail/erlang-questions/2011-May/058768.html
-
-But on a state machine level instead of function level?
+* VM upgrades? How does Erlang deal with them?
 
 ### Protocols
 
@@ -157,6 +179,8 @@ XXX: Horizontally compose state machines.
 
 ### Vertical composition
 
+### Capabilities?
+
 ## Contributing
 
 If any of this sounds interesting, feel free to get in touch.
@@ -168,7 +192,7 @@ If any of this sounds interesting, feel free to get in touch.
 * cli
   - rustup?
 * encryption
-* tunnel, https://tunnelto.dev?
+* tunnel, https://tunnelto.dev or https://github.com/pcarrier/srv.us ?
 * migrate deployment
   - automatic failover?
 * api evolution

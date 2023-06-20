@@ -146,18 +146,21 @@ identChar :: Parser Char
 identChar = satisfyAscii (\c -> isLatinLetter c || isDigit c)
 {-# INLINE identChar #-}
 
-conNameStartChar :: Parser Char
-conNameStartChar = satisfyAscii (\c -> isLatinLetter c && isUpper c)
-{-# INLINE conNameStartChar #-}
+nameStartChar :: Parser Char
+nameStartChar = satisfyAscii (\c -> isLatinLetter c && isUpper c)
+{-# INLINE nameStartChar #-}
 
-conNameChar :: Parser Char
-conNameChar = satisfyAscii (\c -> isLatinLetter c || isDigit c)
-{-# INLINE conNameChar #-}
+nameChar :: Parser Char
+nameChar = satisfyAscii (\c -> isLatinLetter c || isDigit c)
+{-# INLINE nameChar #-}
 
 -- | Check whether a `Span` contains exactly a keyword. Does not change parsing state.
 isKeyword :: Span -> Parser ()
 isKeyword span0 = inSpan span0 $ do
   $(switch [| case _ of
+      "machine"  -> pure ()
+      "refines"  -> pure ()
+      "where"    -> pure ()
       "function" -> pure ()
       "state"    -> pure ()
       "language" -> pure ()

@@ -56,17 +56,17 @@ call_ cid smid input = do
     Left  err             -> error err
     Right (Output output) -> return output
 
-spawn :: Client -> SMId -> CCC -> Value -> IO ()
-spawn (Client mgr req c) smid code state = do
-  let body = RequestBodyBS (cEncodeSpawn c (Spawn smid code state))
+spawn :: Client -> SMId -> CCC -> Value -> LangDecl -> IO ()
+spawn (Client mgr req c) smid code state lang = do
+  let body = RequestBodyBS (cEncodeSpawn c (Spawn smid code state lang))
   resp <- httpLbs req { method = "PUT", requestBody = body } mgr
   if responseStatus resp == ok200
   then return ()
   else error "spawn: failed" -- XXX: error msg?
 
-upgrade :: Client -> SMId -> CCC -> CCC -> CCC -> IO ()
-upgrade (Client mgr req c) smid oldCode newCode stateMigration = do
-  let body = RequestBodyBS (cEncodeUpgrade c (Upgrade smid oldCode newCode stateMigration))
+upgrade :: Client -> SMId -> CCC -> CCC -> CCC -> LangDecl -> IO ()
+upgrade (Client mgr req c) smid oldCode newCode stateMigration newLang = do
+  let body = RequestBodyBS (cEncodeUpgrade c (Upgrade smid oldCode newCode stateMigration newLang))
   resp <- httpLbs req { method = "PATCH", requestBody = body } mgr
   if responseStatus resp == ok200
   then return ()

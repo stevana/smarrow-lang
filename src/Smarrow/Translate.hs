@@ -15,8 +15,8 @@ import Smarrow.AST
 
 -- https://github.com/phadej/overloaded/blob/master/src/Overloaded/Plugin/Categories.hs#L416
 
-translate :: Expr -> CCC
-translate = simplify . tr defaultEnv
+translate :: Env -> Expr -> CCC
+translate e = simplify . tr e
 
 tr :: Env -> Expr -> CCC
 tr env (Proc pat body) = case body of

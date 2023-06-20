@@ -63,6 +63,7 @@ library
     Smarrow.AST.Core
     Smarrow.AST.Literals
     Smarrow.AST.Names
+    Smarrow.AST.Operations
     Smarrow.AST.Surface
     Smarrow.AST.Types
     Smarrow.AST.Value
@@ -97,6 +98,7 @@ library
     , bytestring
     , containers
     , directory
+    , filepath
     , stm
     , template-haskell
     , text

@@ -1,5 +1,5 @@
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StrictData #-}
 
 module Smarrow.Deploy.Config where
 
@@ -9,8 +9,9 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.String (IsString)
 
-import Smarrow.Interpreter
 import Smarrow.AST
+import Smarrow.Environment
+import Smarrow.Interpreter
 
 ------------------------------------------------------------------------
 
@@ -27,6 +28,7 @@ data Config = Config
 data StateMachine = StateMachine
   { smCode  :: CCC
   , smState :: Value
+  , smLang  :: LangDecl
   }
 
 ------------------------------------------------------------------------
@@ -40,21 +42,23 @@ stepSM :: SMId -> Value -> Config -> (Config, Value)
 stepSM smid input cfg =
   let
     sm                   = cConfig cfg Map.! smid
-    PairV state' output  = run (smCode sm) input (smState sm)
+    env                  = extendEnvLang defaultEnv (ldTypes (smLang sm))
+    PairV state' output  = run env (smCode sm) input (smState sm)
     cfg' = cfg { cConfig = Map.insert smid sm { smState = state' } (cConfig cfg) }
   in
     (cfg', output)
 
-spawnSM :: SMId -> CCC -> Value -> Config -> Config
-spawnSM smid code state cfg =
-  cfg { cConfig = Map.insert smid (StateMachine code state) (cConfig cfg) }
+spawnSM :: SMId -> CCC -> Value -> LangDecl -> Config -> Config
+spawnSM smid code state lang cfg =
+  cfg { cConfig = Map.insert smid (StateMachine code state lang) (cConfig cfg) }
 
 -- XXX: Check if we are running oldCode.
-upgradeSM :: SMId -> CCC -> CCC -> CCC -> Config -> Config
-upgradeSM smid oldCode newCode stateMigration cfg =
-  cfg { cConfig = Map.insert smid (StateMachine newCode migratedState) (cConfig cfg) }
+upgradeSM :: SMId -> CCC -> CCC -> CCC -> LangDecl -> Config -> Config
+upgradeSM smid oldCode newCode stateMigration newLang cfg =
+  cfg { cConfig = Map.insert smid (StateMachine newCode migratedState newLang) (cConfig cfg) }
   where
     sm = cConfig cfg Map.! smid
     -- XXX: Support for migrations that use state?
     -- XXX: Partial, return tuple instead...
-    PairV _unit migratedState = run stateMigration (smState sm) UnitV
+    PairV _unit migratedState = run defaultEnv -- XXX: extend env?
+      stateMigration (smState sm) UnitV

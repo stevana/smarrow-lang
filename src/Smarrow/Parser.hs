@@ -22,16 +22,16 @@ import Smarrow.AST
 
 --------------------------------------------------------------------------------
 
-parseFile_ :: FilePath -> IO Expr
+parseFile_ :: FilePath -> IO Machine
 parseFile_ fp = do
   r <- parseFile fp
   case r of
     Left err -> do
       putStrLn err
       exitFailure
-    Right expr -> return expr
+    Right sm -> return sm
 
-parseFile :: FilePath -> IO (Either String Expr)
+parseFile :: FilePath -> IO (Either String Machine)
 parseFile fp = fmap (runParser_ pSrc') (BS.readFile fp)
   `catch` \(err :: IOError) -> return (Left (displayException err))
 
@@ -86,9 +86,9 @@ ident = token $ byteStringOf $
 ident' :: Parser Name
 ident' = ident `cut'` (Msg "identifier")
 
-conName :: Parser Name
-conName = token $ byteStringOf $
-  withSpan (conNameStartChar *> skipMany conNameChar) (\_ span' -> fails (isKeyword span'))
+name :: Parser Name
+name = token $ byteStringOf $
+  withSpan (nameStartChar *> skipMany nameChar) (\_ span' -> fails (isKeyword span'))
 
 digit :: Parser Int
 digit = (\c -> ord c - ord '0') <$> satisfyAscii isDigit
@@ -102,15 +102,58 @@ int = token $ do
 
 ------------------------------------------------------------------------
 
-pSrc' :: Parser Expr
-pSrc' = ws *> pExpr' <* eof `cut` [Msg "end of input (lexical error)"]
+pSrc' :: Parser Machine
+pSrc' = ws *> pMachine' <* eof `cut` [Msg "end of input (lexical error)"]
+
+pMachine' :: Parser Machine
+pMachine' = do
+  $(keyword' "machine")
+  smName <- MachineName <$> name
+  smRefines <- branch $(keyword "refines") (Just . MachineName <$> name) (pure Nothing)
+  $(keyword' "where")
+  smState <- pStateDecl'
+  smLang <- pLangDecl'
+  smFun <- pExpr'
+  return (Machine smName smRefines smState smLang smFun)
+
+pStateDecl' :: Parser StateDecl
+pStateDecl' = do
+  $(keyword' "state")
+  $(symbol' ":")
+  ty <- pType'
+  $(symbol' "=")
+  val <- pValue'
+  return (StateDecl ty val)
+
+pType' :: Parser Type
+pType' = pType `cut` ["type"]
+
+pType :: Parser Type
+pType = pDefined
+  where
+    pDefined = Defined . TypeName <$> (name <|> ("()" <$ $(symbol "()")))
+
+pLangDecl' :: Parser LangDecl
+pLangDecl' = do
+  $(keyword' "language")
+  $(symbol' ":")
+  ops <- many (pOp <* $(symbol "|"))
+  lastOp <- pOp
+  return (LangDecl (ops ++ [lastOp]))
+  where
+    pOp :: Parser (Type, Type)
+    pOp = do
+      a <- pType
+      $(symbol' "->")
+      b <- pType'
+      return (a, b)
 
 pExpr' :: Parser Expr
-pExpr' = pProc <|> eqLt' `cut` ["expr"]
+pExpr' = pFun <|> eqLt' `cut` ["expr"]
   where
-    pProc :: Parser Expr
-    pProc = do
-      $(keyword "proc")
+    pFun :: Parser Expr
+    pFun = do
+      $(keyword "function")
       pat <- pPat'
       $(symbol' "->")
       cmd <- pCmd'
@@ -159,7 +202,7 @@ pExpr' = pProc <|> eqLt' `cut` ["expr"]
         pVarE = VarE <$> pVar
 
         pCon :: Parser Expr
-        pCon = Con . ConName <$> conName
+        pCon = Con . ConName <$> name
 
         pInt :: Parser Expr
         pInt = LitE . Int <$> int
@@ -193,7 +236,7 @@ pPat = pVarP <|> pConNameP <|> pUnitP <|> pTupleP <|> pWildP
     pVarP = VarP <$> pVar
 
     pConNameP :: Parser Pat
-    pConNameP = ConNameP . ConName <$> conName
+    pConNameP = ConNameP . ConName <$> name
 
     pUnitP :: Parser Pat
     pUnitP = $(symbol "()") $> UnitP
@@ -289,4 +332,4 @@ pValue = pPair <|> pUnitV <|> pInt <|> pCon
     pInt = IntV <$> int
 
     pCon :: Parser Value
-    pCon = ConV . ConName <$> conName
+    pCon = ConV . ConName <$> name

@@ -2,18 +2,18 @@
 
 module Smarrow.AST.Types where
 
+import Data.ByteString (ByteString)
 import Data.String (IsString)
-import Data.Text (Text)
 
 import Smarrow.AST.Names
 
 ------------------------------------------------------------------------
 
 data Type
-  = IntT
-  | UnitT
+  = Defined TypeName
   | AnonymousRecord [(FieldName, Type)]
   | AnonymousSum [ConName] -- XXX: Only enum atm, add products of types.
+  deriving (Show, Read)
 
-newtype FieldName = FieldName Text
-  deriving (Eq, Ord, Show, IsString)
+newtype FieldName = FieldName ByteString
+  deriving (Eq, Ord, Show, Read, IsString)

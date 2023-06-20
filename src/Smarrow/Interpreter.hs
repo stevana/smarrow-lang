@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Trans.State.Strict
 
 import Smarrow.AST
+import Smarrow.Environment
 import Smarrow.Translate
 
 ------------------------------------------------------------------------
@@ -53,15 +54,18 @@ evalLit (Char c) = CharV c
 
 ------------------------------------------------------------------------
 
-interpret :: Expr -> (Value -> Value -> (Value, Value))
-interpret expr input state = (state', output)
+interpret :: Env -> Expr -> (Value -> Value -> (Value, Value))
+interpret env expr input state = (state', output)
   where
-    (output, state') = runState (eval (translate expr) input) state
+    input_ = translateValueCons env input
+    -- state_ = translateValueCons env state
+    (output, state') = runState (eval (translate env expr) input_) state
 
-run :: CCC -> Value -> Value -> Value
-run c input state = PairV state' output
+run :: Env -> CCC -> Value -> Value -> Value
+run env code input state = PairV state' output
   where
-    (output, state') = runState (eval c input) state
+    input_ = translateValueCons env input
+    (output, state') = runState (eval code input_) state
 
 ------------------------------------------------------------------------
 

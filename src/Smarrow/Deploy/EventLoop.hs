@@ -14,8 +14,6 @@ import Smarrow.Deploy.Event
 import Smarrow.Deploy.EventQueue
 import Smarrow.Deploy.PendingRequests
 import Smarrow.Deploy.Transport
-import Smarrow.Environment
-import Smarrow.Translate
 
 ------------------------------------------------------------------------
 
@@ -54,18 +52,18 @@ handleEvent :: Config -> Transport -> Codec -> Event -> IO Config
 handleEvent cfg t c ev = case ev of
   InputEv cid bs ->
     withSuccessDecode (cDecodeInput c) cid bs $ \(Input smid input) -> do
-      let input' = translateValueCons defaultEnv input
-          (cfg', output) = stepSM smid input' cfg
+      let (cfg', output) = stepSM smid input cfg
       tRespond t cid (cEncodeOutput c (Output output))
       return cfg'
   SpawnEv cid bs ->
-    withSuccessDecode (cDecodeSpawn c) cid bs $ \(Spawn smid code initState) -> do
+    withSuccessDecode (cDecodeSpawn c) cid bs $ \(Spawn smid code initState lang) -> do
       tRespond t cid "spawned"
-      return (spawnSM smid code initState cfg)
+      return (spawnSM smid code initState lang cfg)
   UpgradeEv cid bs ->
-    withSuccessDecode (cDecodeUpgrade c) cid bs $ \(Upgrade smid oldCode newCode stateMigration) -> do
-      tRespond t cid "upgraded"
-      return (upgradeSM smid oldCode newCode stateMigration cfg)
+    withSuccessDecode (cDecodeUpgrade c) cid bs $
+      \(Upgrade smid oldCode newCode stateMigration newLang) -> do
+        tRespond t cid "upgraded"
+        return (upgradeSM smid oldCode newCode stateMigration newLang cfg)
   QuitEv -> exitSuccess
   where
     withSuccessDecode :: (ByteString -> Either String a) -> ClientId -> ByteString

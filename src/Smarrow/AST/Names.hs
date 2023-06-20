@@ -15,3 +15,6 @@ unConName (ConName bs) = bs
 
 newtype Var = Var ByteString
   deriving (Show, Eq, Ord, IsString)
+
+newtype TypeName = TypeName ByteString
+  deriving (Eq, Ord, Show, Read, IsString)

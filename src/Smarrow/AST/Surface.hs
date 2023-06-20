@@ -5,32 +5,41 @@
 module Smarrow.AST.Surface where
 
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as BS8
 import Data.String (IsString)
 
 import Smarrow.AST.Literals
 import Smarrow.AST.Types
 import Smarrow.AST.Names
+import Smarrow.AST.Value
+import Smarrow.AST.Operations
 
 ------------------------------------------------------------------------
 
 newtype MachineName = MachineName ByteString
   deriving (Eq, Ord, Show, IsString)
 
+machineNameString :: MachineName -> String
+machineNameString (MachineName bs) = BS8.unpack bs
+
 data Machine = Machine
-  { machineName      :: MachineName
-  , machineState     :: StateDecl
-  , machineLanguage  :: LanguageDecl
-  , machineFunction  :: Expr
+  { machineName     :: MachineName
+  , machineRefines  :: Maybe MachineName
+  , machineState    :: StateDecl
+  , machineLanguage :: LangDecl
+  , machineFunction :: Expr
   }
 
-data LanguageDecl = LanguageDecl
+data LangDecl = LangDecl
   { ldTypes :: [(Type, Type)]
   }
+  deriving (Show, Read)
 
 data StateDecl = StateDecl
-  { sdType :: Type
-  -- , sdDefaultValue :: Value
+  { sdType      :: Type
+  , sdInitValue :: Value
   }
+  deriving Show
 
 data Expr
   = LitE Lit
@@ -53,12 +62,6 @@ data Expr
   | GetE
   | PutE
   deriving (Eq, Show)
-
-data UnaryOp = Not | Negate
-  deriving (Eq, Show)
-
-data BinOp = Add | Mult | And | Or | Eq | Lt
-  deriving (Eq, Show, Read)
 
 data Cmd
   = Expr :-< Expr

@@ -35,6 +35,7 @@ data Spawn = Spawn
   { sSMId         :: SMId
   , sCode         :: CCC
   , sInitialState :: Value
+  , sLang         :: LangDecl
   }
   deriving (Show, Read)
 
@@ -43,6 +44,7 @@ data Upgrade = Upgrade
   , uOldCode        :: CCC -- XXX: hash of old code should be enough?
   , uNewCode        :: CCC
   , uStateMigration :: CCC
+  , uLang           :: LangDecl
   }
   deriving (Show, Read)
 

@@ -2,7 +2,7 @@
 
 module Smarrow.AST.Core where
 
-import Smarrow.AST.Surface (BinOp)
+import Smarrow.AST.Operations (BinOp)
 import Smarrow.AST.Literals
 import Smarrow.AST.Names
 

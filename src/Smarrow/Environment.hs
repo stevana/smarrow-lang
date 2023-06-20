@@ -1,11 +1,8 @@
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Smarrow.Environment where
 
-import Data.ByteString (ByteString)
-import Data.String (IsString)
 import Control.Applicative ((<|>))
 import Data.List (findIndex)
 
@@ -14,9 +11,6 @@ import Smarrow.AST
 ------------------------------------------------------------------------
 
 -- XXX: Move? Only used here.
-
-newtype TypeName = TypeName ByteString
-  deriving (Eq, Ord, Show, IsString)
 
 data TypeDecl = TypeDecl TypeName TypeSig
   deriving (Eq, Show)
@@ -50,6 +44,14 @@ extendEnv env pat = env { envVars = patVars pat ++
     patVars WildP        = [("_", Id)]
     patVars (ConNameP _) = []
     patVars UnitP        = []
+
+extendEnvLang :: Env -> [(Type, Type)] -> Env
+extendEnvLang env tys =
+  env { envTypeDecls = TypeDecl "Input" (TypeSig conNames) : envTypeDecls env }
+  where
+    conNames = map (go . fst) tys
+    go (Defined (TypeName n)) = ConName n
+    go _ = error "extendEnvLang"
 
 lookupVar :: Env -> Var -> CCC
 lookupVar env v = -- debug "lookupVar" [("env", show (envVars env)), ("var", show v)] $
