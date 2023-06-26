@@ -21,6 +21,19 @@ features such as:
 The goal of the language is to provide a testbed for experimenting with how to
 program distributed systems.
 
+## Why a new language?
+
+"There's a funny disconnect in how we write distributed programs. You write your
+individual modules, but then when you want to connect them together you're out
+of the programming language and into this other world. Maybe we need languages
+that are a little bit more complete now, so that we can write the whole thing in
+the language." -- Barbara Liskov (Turing award lecture, 2008)
+
+"Programmers write programs in programming languages, so programming language
+constructs are a very good way of communicating to programmers if you are trying
+to get them to understand how to build programs." -- Barbara Liskov (Turing
+award lecture, 2008)
+
 ## Getting started
 
 ```haskell
@@ -177,9 +190,16 @@ state machines.
 
 XXX: Horizontally compose state machines.
 
+* [Jim Gray on parallelism via pipelining](https://youtu.be/U3eo49nVxcA?t=1949)
+
 ### Vertical composition
 
 ### Capabilities?
+
+* Lecture on [capabilities](https://youtube.com/watch?v=TQhmua7Z2cY) from MIT's
+  6.858 Computer Systems Security course (2014)
+* [The Heart of Spritely: Distributed Objects and Capability
+  Security](https://spritely.institute/static/papers/spritely-core.html)
 
 ## Contributing
 
@@ -187,6 +207,15 @@ If any of this sounds interesting, feel free to get in touch.
 
 ### To do
 
+* records
+* state migration
+* parametrised inputs/sums of products
+* api evolution
+* deprecation of machines?
+* persistence
+* typechecker
+* state invariants?
+* pre-conditions on input?
 * pretty printer
   - and formatter?
 * cli
@@ -195,9 +224,9 @@ If any of this sounds interesting, feel free to get in touch.
 * tunnel, https://tunnelto.dev or https://github.com/pcarrier/srv.us ?
 * migrate deployment
   - automatic failover?
-* api evolution
 * observability
 * debugger
+* optimise encoding of messages based on frequency in previous deployment?
 
 
 ## See also
