@@ -1,7 +1,6 @@
 module Smarrow.Interpreter where
 
-import Control.Monad
-import Control.Monad.Trans.State.Strict
+import Control.Monad.Trans.State.Strict (State, get, put, runState)
 
 import Smarrow.AST
 import Smarrow.Environment
@@ -22,10 +21,13 @@ eval (f :||| _g)   (LeftV x)        = eval f x
 eval (_f :||| g)   (RightV y)       = eval g y
 eval (f :||| _g)   (Inject _c 0 x)  = eval f x
 eval (_f :||| g)   (Inject _c 1 y)  = eval g y
-eval (FanOut fs)   (Product xs)     = Product <$> zipWithM eval fs xs
-eval (FanIn fs)    (Inject _c i x)  = eval (fs !! i) x
-eval (Project i)   (Product xs)     = return (xs !! i)
+-- XXX: Generalise (:***)
+-- eval (Parallel fs)   (Product xs)     = Product <$> zipWithM eval fs xs
+eval (FanOut fs)   x                = Product <$> mapM (\f -> eval f x) fs
+eval (FanIn fs)     (Inject _c i x) = eval (fs !! i) x
+eval (Project _f i) (Product xs)    = return (xs !! i)
 eval Dup           v                = return (PairV v v)
+-- XXX: Generalise First, Second?
 eval (First f)     (PairV x y)      = PairV <$> eval f x <*> pure y
 eval (Second g)    (PairV x y)      = PairV x <$> eval g y
 eval (BinOpA op)   (PairV x y)      = return (evalBinOp op x y)

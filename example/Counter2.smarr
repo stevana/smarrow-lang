@@ -3,10 +3,10 @@ machine Counter2 refines Counter where
 state : Int = 0
 
 language
-  : Incr -> ()
+  : Incr -> {}
   | Read -> Int
 
 function i -> case i of
-  { Incr -> do { i <- get -< (); put -< i + 2 }
-  ; Read -> get -< ()
+  { Incr -> do { i <- get -< {}; put -< i + 2 }
+  ; Read -> get -< {}
   }

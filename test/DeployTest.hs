@@ -16,16 +16,16 @@ import Smarrow.Translate
 counterCode :: String
 counterCode = unlines
   ["function i -> case i of"
-  ,   "{ True  -> do { i <- get -< (); put -< i + 1 }"
-  ,   "; False -> get -< ()"
+  ,   "{ True  -> do { i <- get -< {}; put -< i + 1 }"
+  ,   "; False -> get -< {}"
   ,   "}"
   ]
 
 counterCode2 :: String
 counterCode2 = unlines
   ["function i -> case i of"
-  ,   "{ True  -> do { i <- get -< (); put -< i + 2 }"
-  ,   "; False -> get -< ()"
+  ,   "{ True  -> do { i <- get -< {}; put -< i + 2 }"
+  ,   "; False -> get -< {}"
   ,   "}"
   ]
 

@@ -41,24 +41,24 @@ import Smarrow.AST
 ------------------------------------------------------------------------
 
 unit_swap :: Assertion
-unit_swap = "function (x, y) -> return -< (y, x)" @ "(1, 2)" ==> "(2, 1)"
+unit_swap = "function {x, y} -> return -< {y, x}" @ "{1, 2}" ==> "{2, 1}"
 
 unit_idId :: Assertion
 unit_idId = "function x -> do { y <- return -< x; return -< y }" @ "1" ==> "1"
 
 unit_dup :: Assertion
-unit_dup = "function x -> return -< (x, x)" @ "1" ==> "(1, 1)"
+unit_dup = "function x -> return -< {x, x}" @ "1" ==> "{1, 1}"
 
 unit_productExpr :: Assertion
 unit_productExpr =
-  "function x -> do { y <- return -< (x, x); return -< (y, x) }" @ "1" ==> "((1, 1), 1)"
+  "function x -> do { y <- return -< {x, x}; return -< {y, x} }" @ "1" ==> "{{1, 1}, 1}"
 
 unit_productPattern :: Assertion
 unit_productPattern =
-  "function x -> do { (y, _) <- return -< x; (z, _) <- return -< y; return -< z }" @ "((1, 2), 3)" ==> "1"
+  "function x -> do { {y, _} <- return -< x; {z, _} <- return -< y; return -< z }" @ "{{1, 2}, 3}" ==> "1"
 
 unit_assoc :: Assertion
-unit_assoc = "function (x, (y, z)) -> return -< ((x, y), z)" @ "(1, (2, 3))" ==> "((1, 2), 3)"
+unit_assoc = "function {x, {y, z}} -> return -< {{x, y}, z}" @ "{1, {2, 3}}" ==> "{{1, 2}, 3}"
 
 unit_ifTrue :: Assertion
 unit_ifTrue = "function b -> if b then return -< 1 else return -< 2" @ "True" ==> "1"
@@ -73,14 +73,14 @@ unit_ifEq2 = "function i -> if i == 2 then return -< True else return -< False" 
 
 unit_counterRead :: Assertion
 unit_counterRead =
-  "function i -> case i of { True  -> do { i <- get -< (); put -< i + 1 }; False -> get -< () }"
+  "function i -> case i of { True  -> do { i <- get -< {}; put -< i + 1 }; False -> get -< {} }"
   @ "False"
   @ "0"
-  ~~> "(0, 0)"
+  ~~> "{0, 0}"
 
 unit_counterIncr :: Assertion
 unit_counterIncr =
-  "function i -> case i of { True  -> do { i <- get -< (); put -< i + 1 }; False -> get -< () }"
+  "function i -> case i of { True  -> do { i <- get -< {}; put -< i + 1 }; False -> get -< {} }"
   @ "True"
   @ "0"
-  ~~> "(1, ())"
+  ~~> "{1, {}}"

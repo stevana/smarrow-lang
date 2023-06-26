@@ -5,6 +5,7 @@ module Smarrow.AST.Core where
 import Smarrow.AST.Operations (BinOp)
 import Smarrow.AST.Literals
 import Smarrow.AST.Names
+import Smarrow.AST.Types
 
 ------------------------------------------------------------------------
 
@@ -24,10 +25,10 @@ data CCC
   | CCC :*** CCC
 
   | Unit
-  | Project Int
-  | FanOut [CCC]
+  | Project FieldName Int
+  | FanOut [CCC] -- Generalises :&&&
   | InjectA ConName Int
-  | FanIn [CCC]
+  | FanIn [CCC] -- Generalised :|||
 
   | BinOpA BinOp
 

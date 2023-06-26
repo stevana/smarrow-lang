@@ -131,7 +131,7 @@ pType' = pType `cut` ["type"]
 pType :: Parser Type
 pType = pDefined
   where
-    pDefined = Defined . TypeName <$> (name <|> ("()" <$ $(symbol "()")))
+    pDefined = Defined . TypeName <$> (name <|> ("{}" <$ $(symbol "{}")))
 
 pLangDecl' :: Parser LangDecl
 pLangDecl' = do
@@ -161,42 +161,27 @@ pExpr' = pFun <|> eqLt' `cut` ["expr"]
 
     eqLt' :: Parser Expr
     eqLt' =
-      pair >>= \e1 ->
-      branch $(symbol "==") (BinOp Eq e1 <$> pair) $
-      branch $(symbol "<")  (BinOp Lt e1 <$> pair) $
+      add' >>= \e1 ->
+      branch $(symbol "==") (BinOp Eq e1 <$> add') $
+      branch $(symbol "<")  (BinOp Lt e1 <$> add') $
       pure e1
-
-    -- XXX: doesn't look right...
-    pair :: Parser Expr
-    pair = pUnit <|> pair' <|> add'
-      where
-        pUnit :: Parser Expr
-        pUnit = do
-          $(symbol "()")
-          return UnitE
-
-    pair' :: Parser Expr
-    pair' = do
-      $(symbol "(")
-      l <- pair
-      $(symbol' ",")
-      r <- pair
-      $(symbol' ")")
-      return (PairE l r)
 
     add' :: Parser Expr
     add' = chainl (BinOp Add) mul' ($(symbol "+") *> mul')
 
     mul' :: Parser Expr
-    mul' = chainl (BinOp Mult) atom' ($(symbol "*") *> atom')
+    mul' = chainl (BinOp Mult) proj' ($(symbol "*") *> proj')
+
+    proj' :: Parser Expr
+    proj' = chainl ProjectE atom' ($(symbol ".") *> (FieldName <$> ident))
 
     atom' :: Parser Expr
     atom' = atom
       `cut` map Msg ["variable", "consturctor", "integer literal", "return",
-                     "get", "put", "parenthesised expression" ]
+                     "get", "put", "record", "unit", "parenthesised expression" ]
 
     atom :: Parser Expr
-    atom = pVarE <|> pCon <|> pInt <|> pReturn <|> pGet <|> pPut <|> pParenExpr
+    atom = pVarE <|> pCon <|> pInt <|> pReturn <|> pGet <|> pPut <|> pProduct <|> pParenExpr
       where
         pVarE :: Parser Expr
         pVarE = VarE <$> pVar
@@ -215,6 +200,9 @@ pExpr' = pFun <|> eqLt' `cut` ["expr"]
 
         pPut :: Parser Expr
         pPut = $(keyword "put") $> PutE
+
+        pProduct :: Parser Expr
+        pProduct = pProductG eqLt' UnitE PairE RecordE
 
         pParenExpr :: Parser Expr
         pParenExpr = $(symbol "(") *> pExpr' <* $(symbol' ")")
@@ -239,15 +227,15 @@ pPat = pVarP <|> pConNameP <|> pUnitP <|> pTupleP <|> pWildP
     pConNameP = ConNameP . ConName <$> name
 
     pUnitP :: Parser Pat
-    pUnitP = $(symbol "()") $> UnitP
+    pUnitP = $(symbol "{}") $> UnitP
 
     pTupleP :: Parser Pat
     pTupleP = do
-      $(symbol "(")
+      $(symbol "{")
       l <- pPat'
       $(symbol' ",")
       r <- pPat'
-      $(symbol' ")")
+      $(symbol' "}")
       return (TupleP l r)
 
     pWildP :: Parser Pat
@@ -311,25 +299,41 @@ pValue' :: Parser Value
 pValue' = pValue `cut` ["tuple", "unit", "integer", "constructor"]
 
 pValue :: Parser Value
-pValue = pPair <|> pUnitV <|> pInt <|> pCon
+pValue = pProduct <|> pInt <|> pCon
   where
-    pPair :: Parser Value
-    pPair = do
-      $(symbol "(")
-      l <- pValue
-      $(symbol' ",")
-      r <- pValue'
-      $(symbol' ")")
-      return (PairV l r)
-
-    pUnitV :: Parser Value
-    pUnitV = do
-      $(symbol "(")
-      $(symbol' ")")
-      return UnitV
+    pProduct :: Parser Value
+    pProduct = pProductG pValue' UnitV PairV RecordV
 
     pInt :: Parser Value
     pInt = IntV <$> int
 
     pCon :: Parser Value
     pCon = ConV . ConName <$> name
+
+pProductG :: Parser a -> a -> (a -> a -> a) -> ([(FieldName, Maybe Type, a)] -> a) -> Parser a
+pProductG p unit pair record = pUnit <|> pPair <|> pRecord
+  where
+    pUnit = $(symbol "{}") $> unit
+
+    pPair = do
+      $(symbol "{")
+      l <- p
+      $(symbol' ",")
+      r <- p
+      $(symbol' "}")
+      return (pair l r)
+
+    pRecord = do
+      $(symbol "{")
+      es <- many (pEntry <* $(symbol ","))
+      e  <- pEntry'
+      $(symbol' "}")
+      return (record (es ++ [e]))
+        where
+          pEntry' = pEntry `cut` ["entry"]
+          pEntry = do
+            field <- ident
+            mTypeAnn <- optional ($(symbol ":") *> pType')
+            $(symbol "=")
+            value <- p
+            return (FieldName field, mTypeAnn, value)

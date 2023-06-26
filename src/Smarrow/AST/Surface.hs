@@ -61,6 +61,8 @@ data Expr
   | Con ConName -- [Expr]
   | GetE
   | PutE
+  | RecordE [(FieldName, Maybe Type, Expr)]
+  | ProjectE Expr FieldName
   deriving (Eq, Show)
 
 data Cmd

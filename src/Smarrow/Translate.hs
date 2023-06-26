@@ -42,6 +42,8 @@ tr env  (Con conName)   = InjectA conName (conNameIndex env conName)
 tr _env GetE            = Get
 tr _env PutE            = Put
 tr _env UnitE           = Unit
+tr env  (RecordE es)    = FanOut (map (\(_field, _mType, value) -> tr env value) es)
+tr env  (ProjectE e f)  = tr env e :>>> Project f (fieldNameIndex env f)
 tr _env e = error (show e)
 
 trAlts :: Env -> Pat -> [Alt] -> [CCC]

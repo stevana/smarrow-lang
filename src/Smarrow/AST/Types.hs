@@ -13,7 +13,7 @@ data Type
   = Defined TypeName
   | AnonymousRecord [(FieldName, Type)]
   | AnonymousSum [ConName] -- XXX: Only enum atm, add products of types.
-  deriving (Show, Read)
+  deriving (Eq, Show, Read)
 
 newtype FieldName = FieldName ByteString
   deriving (Eq, Ord, Show, Read, IsString)
