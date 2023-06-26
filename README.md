@@ -45,19 +45,19 @@ machine Counter where
 state : Int = 0
 
 language
-  : Incr -> ()
+  : Incr -> {}
   | Read -> Int
 
 function i -> case i of
-  { Incr -> do { i <- get -< (); put -< i + 1 }
-  ; Read -> get -< ()
+  { Incr -> do { i <- get -< {}; put -< i + 1 }
+  ; Read -> get -< {}
   }
 ```
 ```bash
 $ cabal run smarrow -- deploy counter example/Counter.smarr
 Deployed: counter
 $ cabal run smarrow -- invoke counter Incr
-()
+{}
 $ cabal run smarrow -- invoke counter Read
 1
 ```
@@ -72,9 +72,12 @@ Upgraded: counter
 $ cabal run smarrow -- invoke counter Read
 1
 $ cabal run smarrow -- invoke counter Incr
-()
+{}
 $ cabal run smarrow -- invoke counter Read
 3
+$ fg
+cabal run smarrow-deploy
+^C
 ```
 
 ## Features
