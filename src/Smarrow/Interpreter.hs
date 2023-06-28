@@ -18,8 +18,6 @@ eval (f :<<< g)    x                = eval f   =<< eval g x
 eval Id            x                = return x
 -- eval App           (PairV (FunV f) (PairV x y)) = return (evalBinOp f x y)
 eval (LitA l)      _x               = return (evalLit l)
-eval (f :||| _g)   (LeftV x)        = eval f x
-eval (_f :||| g)   (RightV y)       = eval g y
 eval (f :||| _g)   (Inject _c 0 x)  = eval f x
 eval (_f :||| g)   (Inject _c 1 y)  = eval g y
 -- XXX: Generalise (:***)

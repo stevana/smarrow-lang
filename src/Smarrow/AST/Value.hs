@@ -12,10 +12,7 @@ import Smarrow.AST.Surface
 ------------------------------------------------------------------------
 
 data Value
-  = PairV Value Value
-  | LitV Lit
-  | LeftV Value
-  | RightV Value
+  = LitV Lit
   | FunV BinOp
   | UnitV
   | Product [Value]
@@ -29,6 +26,9 @@ pattern IntV i = LitV (Int i)
 
 pattern CharV :: Char -> Value
 pattern CharV i = LitV (Char i)
+
+pattern PairV :: Value -> Value -> Value
+pattern PairV u v = Product [u, v]
 
 pattern TrueV :: Value
 pattern TrueV = Inject "True" 0 UnitV

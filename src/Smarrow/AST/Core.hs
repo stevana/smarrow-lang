@@ -1,22 +1,20 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE StrictData #-}
 
 module Smarrow.AST.Core where
 
-import Smarrow.AST.Operations (BinOp)
 import Smarrow.AST.Literals
 import Smarrow.AST.Names
+import Smarrow.AST.Operations (BinOp)
 
 ------------------------------------------------------------------------
 
 data CCC
-  = Fst
-  | Snd
-  | CCC :&&& CCC
-  | CCC :>>> CCC
+  = CCC :>>> CCC
   | CCC :<<< CCC
   | Id
   | App
-  | CCC :||| CCC
   | LitA Lit
   | First CCC
   | Second CCC
@@ -36,6 +34,18 @@ data CCC
   | Get
   | Put
   deriving (Eq, Show, Read)
+
+pattern (:|||) :: CCC -> CCC -> CCC
+pattern l :||| r = FanIn [l, r]
+
+pattern (:&&&) :: CCC -> CCC -> CCC
+pattern l :&&& r = FanOut [l, r]
+
+pattern Fst :: CCC
+pattern Fst = Project "fst" 0
+
+pattern Snd :: CCC
+pattern Snd = Project "snd" 1
 
 simplify1 :: CCC -> CCC
 simplify1 (Id :&&& Id) = Dup
