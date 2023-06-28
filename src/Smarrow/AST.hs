@@ -6,5 +6,4 @@ import Smarrow.AST.Machine as X
 import Smarrow.AST.Names as X
 import Smarrow.AST.Operations as X
 import Smarrow.AST.Surface as X
-import Smarrow.AST.Types as X
 import Smarrow.AST.Value as X
