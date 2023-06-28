@@ -6,7 +6,7 @@
 
 module Smarrow.Parser where
 
-import Control.Exception
+import Control.Exception (catch, displayException)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import Data.Char (ord)
@@ -121,17 +121,17 @@ pStateDecl' = do
   $(keyword' "state")
   $(symbol' ":")
   ty <- pType'
-  $(symbol' "=")
-  val <- pValue'
-  return (StateDecl ty val)
+  return (StateDecl ty)
 
 pType' :: Parser Type
 pType' = pType `cut` ["type"]
 
 pType :: Parser Type
-pType = pDefined
+pType = pDefined <|> pProduct
   where
-    pDefined = Defined . TypeName <$> (name <|> ("{}" <$ $(symbol "{}")))
+    pDefined = Defined . TypeName <$> name
+
+    pProduct = pProductG2 pType' pExpr' UnitT PairT RecordT
 
 pLangDecl' :: Parser LangDecl
 pLangDecl' = do
@@ -173,7 +173,10 @@ pExpr' = pFun <|> eqLt' `cut` ["expr"]
     mul' = chainl (BinOp Mult) proj' ($(symbol "*") *> proj')
 
     proj' :: Parser Expr
-    proj' = chainl ProjectE atom' ($(symbol ".") *> (FieldName <$> ident))
+    proj' = chainl ProjectE update' ($(symbol ".") *> (FieldName <$> ident))
+
+    update' :: Parser Expr
+    update' = chainl UpdateE atom' ($(symbol "//") *> atom)
 
     atom' :: Parser Expr
     atom' = atom
@@ -310,16 +313,19 @@ pValue = pProduct <|> pInt <|> pCon
     pCon :: Parser Value
     pCon = ConV . ConName <$> name
 
-pProductG :: Parser a -> a -> (a -> a -> a) -> ([(FieldName, Maybe Type, a)] -> a) -> Parser a
-pProductG p unit pair record = pUnit <|> pPair <|> pRecord
+pProductG2 :: Parser a -> Parser b
+           -> a -> (a -> a -> a) -> ([(FieldName, Maybe Type, Maybe b)] -> a)
+           -> Parser a
+pProductG2 pa pb unit pair record = pUnit <|> pPair <|> pRecord
   where
     pUnit = $(symbol "{}") $> unit
 
     pPair = do
       $(symbol "{")
-      l <- p
-      $(symbol' ",")
-      r <- p
+      -- XXX: can we be more strict here?
+      l <- try pa
+      $(symbol ",")
+      r <- pa
       $(symbol' "}")
       return (pair l r)
 
@@ -334,6 +340,8 @@ pProductG p unit pair record = pUnit <|> pPair <|> pRecord
           pEntry = do
             field <- ident
             mTypeAnn <- optional ($(symbol ":") *> pType')
-            $(symbol "=")
-            value <- p
-            return (FieldName field, mTypeAnn, value)
+            mValue   <- optional ($(symbol "=") *> pb)
+            return (FieldName field, mTypeAnn, mValue)
+
+pProductG :: Parser a -> a -> (a -> a -> a) -> ([(FieldName, Maybe Type, Maybe a)] -> a) -> Parser a
+pProductG p unit pair record = pProductG2 p p unit pair record

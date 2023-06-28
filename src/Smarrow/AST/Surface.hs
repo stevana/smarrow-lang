@@ -9,37 +9,21 @@ import qualified Data.ByteString.Char8 as BS8
 import Data.String (IsString)
 
 import Smarrow.AST.Literals
-import Smarrow.AST.Types
 import Smarrow.AST.Names
-import Smarrow.AST.Value
 import Smarrow.AST.Operations
 
 ------------------------------------------------------------------------
 
-newtype MachineName = MachineName ByteString
-  deriving (Eq, Ord, Show, IsString)
+data Type
+  = Defined TypeName
+  | UnitT
+  | PairT Type Type
+  | RecordT (Record Expr)
+  -- | AnonymousSum [ConName] -- XXX: Only enum atm, add products of types.
+  deriving (Eq, Show, Read)
 
-machineNameString :: MachineName -> String
-machineNameString (MachineName bs) = BS8.unpack bs
-
-data Machine = Machine
-  { machineName     :: MachineName
-  , machineRefines  :: Maybe MachineName
-  , machineState    :: StateDecl
-  , machineLanguage :: LangDecl
-  , machineFunction :: Expr
-  }
-
-data LangDecl = LangDecl
-  { ldTypes :: [(Type, Type)]
-  }
-  deriving (Show, Read)
-
-data StateDecl = StateDecl
-  { sdType      :: Type
-  , sdInitValue :: Value
-  }
-  deriving Show
+type Record a = [(FieldName, Maybe Type, Maybe a)]
+  -- deriving (Eq, Show, Read)
 
 data Expr
   = LitE Lit
@@ -61,9 +45,10 @@ data Expr
   | Con ConName -- [Expr]
   | GetE
   | PutE
-  | RecordE [(FieldName, Maybe Type, Expr)]
+  | RecordE (Record Expr)
   | ProjectE Expr FieldName
-  deriving (Eq, Show)
+  | UpdateE Expr Expr
+  deriving (Eq, Show, Read)
 
 data Cmd
   = Expr :-< Expr
@@ -78,24 +63,24 @@ data Cmd
   | Do [Stmt] Cmd
   -- | App Cmd Expr
   -- | CmdVar Name
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 infix 9 :-<
 infix 8 :<-
 
 data Stmt = Pat :<- Cmd
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data Pat = WildP | UnitP | TupleP Pat Pat | ConNameP ConName | VarP Var
-  deriving (Show, Eq)
+  deriving (Show, Read, Eq)
 
 data Alt = Alt Pat GuardedAlts -- [Decl]
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data GuardedAlts
   = UnguardedAlt Cmd
   | GuardedAlts [GuardedAlt]
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data GuardedAlt = GuardedAlt Expr Cmd
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)

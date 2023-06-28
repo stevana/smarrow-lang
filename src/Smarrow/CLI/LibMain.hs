@@ -9,6 +9,7 @@ import Smarrow.Deploy.Codec (readShowCodec)
 import Smarrow.Deploy.Config (SMId, displaySMId)
 import Smarrow.Deploy.HttpClient (call_, newClient, spawn, upgrade)
 import Smarrow.Environment
+import Smarrow.Interpreter
 import Smarrow.Parser (parseFile_, parseValue_)
 import Smarrow.PrettyPrint
 import Smarrow.Translate
@@ -49,15 +50,19 @@ libMain = go . oCommand =<< execParser infoOpts
       c <- newClient host readShowCodec
       case machineRefines machine of
         Nothing -> do
-          let env       = extendEnvLang defaultEnv (ldTypes (machineLanguage machine))
+          let env       = extendEnvLangRecord defaultEnv
+                            (ldTypes (machineLanguage machine))
+                            (sdType (machineState machine))
               core      = translate env (machineFunction machine)
-              initState = sdInitValue (machineState machine)
+              initState = evalType (sdType (machineState machine))
           spawn c smid core initState (machineLanguage machine)
           putStrLn ("Deployed: " ++ displaySMId smid)
         Just refinee -> do
           oldMachine <- parseFile_ (takeDirectory fp </> machineNameString refinee <.> "smarr")
-          let oldEnv  = extendEnvLang defaultEnv (ldTypes (machineLanguage oldMachine))
-              newEnv  = extendEnvLang defaultEnv (ldTypes (machineLanguage machine))
+          let oldEnv  = extendEnvLangRecord defaultEnv (ldTypes (machineLanguage oldMachine))
+                                                       (sdType (machineState oldMachine))
+              newEnv  = extendEnvLangRecord defaultEnv (ldTypes (machineLanguage machine))
+                                                       (sdType (machineState machine))
               oldCode = translate oldEnv (machineFunction oldMachine)
               newCode = translate newEnv (machineFunction machine)
 

@@ -67,9 +67,17 @@ extendEnvLang env tys =
     go (Defined (TypeName n)) = Constructor (ConName n) []
     go _ = error "extendEnvLang"
 
-extendEnvRecord :: Env -> [Parameter] -> Env
-extendEnvRecord env params =
-  env { envTypeDecls = TypeDecl "_" (TypeSig [Constructor "_" params]) : envTypeDecls env }
+extendEnvRecord :: Env -> Type -> Env
+extendEnvRecord env ty = case ty of
+  RecordT entries ->
+    let
+      params = [ Parameter fieldName typ | (fieldName, Just typ, _mValue) <- entries ] -- XXX: assert no Nothings?
+    in
+      env { envTypeDecls = TypeDecl "_" (TypeSig [Constructor "_" params]) : envTypeDecls env }
+  _ -> error "extendEnvRecord: impossible, due to typechecking"
+
+extendEnvLangRecord :: Env -> [(Type, Type)] -> Type -> Env
+extendEnvLangRecord env lang state = extendEnvRecord (extendEnvLang env lang) state
 
 lookupVar :: Env -> Var -> CCC
 lookupVar env v = -- debug "lookupVar" [("env", show (envVars env)), ("var", show v)] $

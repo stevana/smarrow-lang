@@ -1,5 +1,6 @@
 module Smarrow.Interpreter where
 
+import Data.Maybe (fromMaybe)
 import Control.Monad.Trans.State.Strict (State, get, put, runState)
 
 import Smarrow.AST
@@ -26,6 +27,7 @@ eval (_f :||| g)   (Inject _c 1 y)  = eval g y
 eval (FanOut fs)   x                = Product <$> mapM (\f -> eval f x) fs
 eval (FanIn fs)     (Inject _c i x) = eval (fs !! i) x
 eval (Project _f i) (Product xs)    = return (xs !! i)
+eval UpdateA        (PairV (Product xs) (Product ys)) = undefined
 eval Dup           v                = return (PairV v v)
 -- XXX: Generalise First, Second?
 eval (First f)     (PairV x y)      = PairV <$> eval f x <*> pure y
@@ -68,6 +70,17 @@ run env code input state = PairV state' output
   where
     input_ = translateValueCons env input
     (output, state') = runState (eval code input_) state
+
+evalType :: Type -> Value
+evalType (RecordT entries) = Product
+  [ snd (interpret defaultEnv (fromMaybe (error "evalType: nothing") mExpr) UnitV UnitV)
+  | (_fieldName, _mType, mExpr) <- entries
+  ]
+-- evalType (RecordT entries) = RecordV
+--   [ (fieldName, mType, fmap (\expr -> snd (interpret defaultEnv expr UnitV UnitV)) mExpr)
+--   | (fieldName, mType, mExpr) <- entries
+--   ]
+evalType _ty = error "evalType"
 
 ------------------------------------------------------------------------
 

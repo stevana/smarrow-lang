@@ -1,12 +1,12 @@
 machine Counter where
 
-state : Int = 0
+state : { count : Int = 0 }
 
 language
   : Incr -> {}
   | Read -> Int
 
 function i -> case i of
-  { Incr -> do { i <- get -< {}; put -< i + 1 }
-  ; Read -> get -< {}
+  { Incr -> do { s <- get -< {}; put -< { count = s.count + 1 } }
+  ; Read -> do { s <- get -< {}; return -< s.count }
   }

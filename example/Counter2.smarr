@@ -1,12 +1,12 @@
 machine Counter2 refines Counter where
 
-state : Int = 0
+state : { count : Int = 0 }
 
 language
   : Incr -> {}
   | Read -> Int
 
 function i -> case i of
-  { Incr -> do { i <- get -< {}; put -< i + 2 }
-  ; Read -> get -< {}
+  { Incr -> do { s <- get -< {}; put -< { count = s.count + 2 } }
+  ; Read -> do { s <- get -< {}; return -< s.count }
   }

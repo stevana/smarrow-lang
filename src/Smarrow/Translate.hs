@@ -1,5 +1,6 @@
 module Smarrow.Translate where
 
+import Data.Maybe (fromMaybe)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Set (Set)
@@ -42,8 +43,10 @@ tr env  (Con conName)   = InjectA conName (conNameIndex env conName)
 tr _env GetE            = Get
 tr _env PutE            = Put
 tr _env UnitE           = Unit
-tr env  (RecordE es)    = FanOut (map (\(_field, _mType, value) -> tr env value) es)
+tr env  (RecordE es)    = FanOut (map (\(_field, _mType, mValue) ->
+                                         tr env (fromMaybe (error "tr: impossible, due to typechecking") mValue)) es)
 tr env  (ProjectE e f)  = tr env e :>>> Project f (fieldNameIndex env f)
+tr env  (UpdateE r r')  = tr env r :&&& tr env r' :>>> UpdateA
 tr _env e = error (show e)
 
 trAlts :: Env -> Pat -> [Alt] -> [CCC]

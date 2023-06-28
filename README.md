@@ -23,33 +23,36 @@ program distributed systems.
 
 ## Why a new language?
 
-"There's a funny disconnect in how we write distributed programs. You write your
-individual modules, but then when you want to connect them together you're out
-of the programming language and into this other world. Maybe we need languages
-that are a little bit more complete now, so that we can write the whole thing in
-the language." -- Barbara Liskov (Turing award lecture, 2008)
+Barbara Liskov gave two good reasons in her Turing award
+[lecture](https://amturing.acm.org/vp/liskov_1108679.cfm) (2008):
 
-"Programmers write programs in programming languages, so programming language
-constructs are a very good way of communicating to programmers if you are trying
-to get them to understand how to build programs." -- Barbara Liskov (Turing
-award lecture, 2008)
+> "Programmers write programs in programming languages, so programming language
+> constructs are a very good way of communicating to programmers if you are
+> trying to get them to understand how to build programs."
+
+> "There's a funny disconnect in how we write distributed programs. You write
+> your individual modules, but then when you want to connect them together
+> you're out of the programming language and into this other world. Maybe we
+> need languages that are a little bit more complete now, so that we can write
+> the whole thing in the language."
 
 ## Getting started
 
-```haskell
+```bash
 $ cabal run smarrow-deploy &
 $ cat example/Counter.smarr
-
+```
+```
 machine Counter where
 
-state : Int = 0
+state : { count : Int = 0 }
 
 language
   : Incr -> {}
   | Read -> Int
 
 function i -> case i of
-  { Incr -> do { i <- get -< {}; put -< i + 1 }
+  { Incr -> do { s <- get -< {}; put -< { count = s.count + 1 } }
   ; Read -> get -< {}
   }
 ```
@@ -63,8 +66,8 @@ $ cabal run smarrow -- invoke counter Read
 ```
 ```diff
 $ diff -u example/Counter.smarr example/Counter2.smarr
--   put -< n + 1
-+   put -< n + 2
+-   put -< { count = s.count + 1 }
++   put -< { count = s.count + 2 }
 $ cabal run smarrow -- deploy counter example/Counter2.smarr
 Upgraded: counter
 ```
@@ -197,12 +200,17 @@ XXX: Horizontally compose state machines.
 
 ### Vertical composition
 
-### Capabilities?
+### Capabilities
 
 * Lecture on [capabilities](https://youtube.com/watch?v=TQhmua7Z2cY) from MIT's
   6.858 Computer Systems Security course (2014)
 * [The Heart of Spritely: Distributed Objects and Capability
   Security](https://spritely.institute/static/papers/spritely-core.html)
+
+### Formal verification
+
+* Model-checking à la TLA+: https://github.com/Gabriella439/HasCal
+* https://lawrencecpaulson.github.io/2022/10/12/verifying-distributed-systems-isabelle.html
 
 ## Contributing
 
@@ -230,7 +238,7 @@ If any of this sounds interesting, feel free to get in touch.
 * observability
 * debugger
 * optimise encoding of messages based on frequency in previous deployment?
-
+* echo server benchmark
 
 ## See also
 

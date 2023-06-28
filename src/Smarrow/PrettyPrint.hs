@@ -18,10 +18,10 @@ prettyValue (RecordV es0)   = "{" ++ prettyEntries es0 ++ "}"
     prettyEntries [e] = prettyEntry e
     prettyEntries (e : es) = prettyEntry e ++ ", " ++ prettyEntries es
 
-    prettyEntry (FieldName field, mType, value) =
+    prettyEntry (FieldName field, mType, mValue) =
       BS8.unpack field ++
-      maybe "" (\typ -> ":" ++ prettyType typ) mType ++
-      " = " ++ prettyValue value
+      maybe "" (\typ -> " : " ++ prettyType typ) mType ++
+      maybe "" (\val -> " = " ++ prettyValue val) mValue
 prettyValue v               = error ("prettyValue: " ++ show v)
 
 prettyType :: Type -> String

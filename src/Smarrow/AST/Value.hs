@@ -7,7 +7,7 @@ module Smarrow.AST.Value where
 import Smarrow.AST.Literals
 import Smarrow.AST.Names
 import Smarrow.AST.Operations
-import Smarrow.AST.Types
+import Smarrow.AST.Surface
 
 ------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ data Value
   | Product [Value]
   | Inject ConName Int Value
   | ConV ConName
-  | RecordV [(FieldName, Maybe Type, Value)]
+  | RecordV (Record Value)
   deriving (Eq, Show, Read)
 
 pattern IntV :: Int -> Value
